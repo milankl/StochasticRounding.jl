@@ -1,0 +1,12 @@
+[deps]
+RandomNumbers = "e6cf234a-135c-5ec9-84dd-332b85af5143"
+
+[compat]
+julia = "1"
+RandomNumbers = "^1.4"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
