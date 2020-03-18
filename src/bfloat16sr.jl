@@ -11,8 +11,21 @@ isfinite(x::BFloat16sr) = (reinterpret(UInt16,x) & exponent_mask(BFloat16sr)) !=
 isnan(x::BFloat16sr) = (reinterpret(UInt16,x) & ~sign_mask(BFloat16sr)) > exponent_mask(BFloat16sr)
 
 precision(::Type{BFloat16sr}) = 8
-Base.one(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x3f80)
-Base.zero(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x0000)
+one(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x3f80)
+zero(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x0000)
+
+const InfB16sr = reinterpret(BFloat16sr, 0x7f80)
+const NaNB16sr = reinterpret(BFloat16sr, 0x7fc0)
+
+typemin(::Type{BFloat16sr}) = -InfB16sr
+typemax(::Type{BFloat16sr}) = InfB16sr
+floatmin(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x0080)
+floatmax(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x7f7f)
+
+typemin(::BFloat16sr) = typemin(BFloat16sr)
+typemax(::BFloat16sr) = typemax(BFloat16sr)
+floatmin(::BFloat16sr) = floatmin(BFloat16sr)
+floatmax(::BFloat16sr) = floatmax(BFloat16sr)
 
 # Truncation from Float32
 Base.uinttype(::Type{BFloat16sr}) = UInt16
@@ -21,10 +34,19 @@ Base.trunc(::Type{BFloat16sr}, x::Float32) = reinterpret(BFloat16sr,
     )
 
 # same for BFloat16sr, but do not apply stochastic rounding to avoid InexactError
-Base.round(x::BFloat16sr, r::RoundingMode{:Up}) = BFloat16sr(ceil(Float32(x)))
-Base.round(x::BFloat16sr, r::RoundingMode{:Down}) = BFloat16sr(floor(Float32(x)))
-Base.round(x::BFloat16sr, r::RoundingMode{:Nearest}) = BFloat16sr(round(Float32(x)))
-Base.Int64(x::BFloat16sr) = Int64(Float32(x))
+round(x::BFloat16sr, r::RoundingMode{:Up}) = BFloat16sr(ceil(Float32(x)))
+round(x::BFloat16sr, r::RoundingMode{:Down}) = BFloat16sr(floor(Float32(x)))
+round(x::BFloat16sr, r::RoundingMode{:Nearest}) = BFloat16sr(round(Float32(x)))
+
+# conversion to integer
+Int64(x::BFloat16sr) = Int64(Float32(x))
+Int32(x::BFloat16sr) = Int32(Float32(x))
+Int16(x::BFloat16sr) = Int16(Float32(x))
+Int8(x::BFloat16sr) = Int8(Float32(x))
+UInt64(x::BFloat16sr) = UInt64(Float32(x))
+UInt32(x::BFloat16sr) = UInt32(Float32(x))
+UInt16(x::BFloat16sr) = UInt16(Float32(x))
+UInt8(x::BFloat16sr) = UInt8(Float32(x))
 
 """
     epsBF16
@@ -37,7 +59,7 @@ const F32_one = reinterpret(UInt32,one(Float32))
 
 # Conversion from Float32 with deterministic rounding - identical to BFloat16(::Float32)
 function BFloat16sr(x::Float32)
-    isnan(x) && return NaNB16
+    isnan(x) && return NaNB16sr
 	# Round to nearest even (matches TensorFlow and our convention for
     # rounding to lower precision floating point types).
     h = reinterpret(UInt32, x)
@@ -48,7 +70,7 @@ end
 # Conversion from Float32 with distance proportional stochastic rounding
 # only used within arithmetic operations
 function BFloat16_stochastic_round(x::Float32)
-    isnan(x) && return NaNB16
+    isnan(x) && return NaNB16sr
 
 	ui = reinterpret(UInt32, x)
 
@@ -72,7 +94,7 @@ function BFloat16_stochastic_round(x::Float32)
 end
 
 function BFloat16_chance_roundup(x::Float32)
-    isnan(x) && return NaNB16
+    isnan(x) && return NaNB16sr
 	ui = reinterpret(UInt32, x)
 	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float32)
@@ -80,25 +102,15 @@ function BFloat16_chance_roundup(x::Float32)
     return frac
 end
 
-# Conversion from Float64
-function BFloat16sr(x::Float64)
-	BFloat16sr(Float32(x))
-end
+# Conversions
+Float32(x::BFloat16sr) = reinterpret(Float32, UInt32(reinterpret(UInt16, x)) << 16)
 
-# Conversion from Integer
-function BFloat16sr(x::Integer)
-	convert(BFloat16sr, convert(Float32, x))
-end
+BFloat16sr(x::Float64) = BFloat16sr(Float32(x))
+BFloat16sr(x::Float16) = BFloat16sr(Float32(x))
+BFloat16sr(x::Integer) = BFloat16sr(Float32(x))
 
-# Expansion to Float32 - no rounding applied
-function Base.Float32(x::BFloat16sr)
-    reinterpret(Float32, UInt32(reinterpret(UInt16, x)) << 16)
-end
-
-# Expansion to Float64
-function Base.Float64(x::BFloat16sr)
-    Float64(Float32(x))
-end
+Float64(x::BFloat16sr) = Float64(Float32(x))
+Float16(x::BFloat16sr) = Float16(Float32(x))
 
 # conversion between BFloat16 and BFloat16sr
 BFloat16(x::BFloat16sr) = reinterpret(BFloat16,x)
@@ -162,20 +174,20 @@ function Base.:(>=)(x::BFloat16sr, y::BFloat16sr)
 	return Float32(x) >= Float32(y)
 end
 
-Base.widen(::Type{BFloat16sr}) = Float32
+widen(::Type{BFloat16sr}) = Float32
 
-Base.promote_rule(::Type{Float32}, ::Type{BFloat16sr}) = Float32
-Base.promote_rule(::Type{Float64}, ::Type{BFloat16sr}) = Float64
+promote_rule(::Type{Float32}, ::Type{BFloat16sr}) = Float32
+promote_rule(::Type{Float64}, ::Type{BFloat16sr}) = Float64
 
 for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128)
-	@eval Base.promote_rule(::Type{BFloat16sr}, ::Type{$t}) = BFloat16sr
+	@eval promote_rule(::Type{BFloat16sr}, ::Type{$t}) = BFloat16sr
 end
 
 # Wide multiplication
-Base.widemul(x::BFloat16sr, y::BFloat16sr) = Float32(x) * Float32(y)
+widemul(x::BFloat16sr, y::BFloat16sr) = Float32(x) * Float32(y)
 
 # Showing
-function Base.show(io::IO, x::BFloat16sr)
+function show(io::IO, x::BFloat16sr)
     if isinf(x)
         print(io, x < 0 ? "-InfB16" : "InfB16")
     elseif isnan(x)
@@ -188,9 +200,9 @@ function Base.show(io::IO, x::BFloat16sr)
     end
 end
 
-Base.bitstring(x::BFloat16sr) = bitstring(reinterpret(UInt16,x))
+bitstring(x::BFloat16sr) = bitstring(reinterpret(UInt16,x))
 
-function Base.bitstring(x::BFloat16sr,mode::Symbol)
+function bitstring(x::BFloat16sr,mode::Symbol)
     if mode == :split	# split into sign, exponent, signficand
         s = bitstring(x)
 		return "$(s[1]) $(s[2:9]) $(s[10:end])"
@@ -199,7 +211,7 @@ function Base.bitstring(x::BFloat16sr,mode::Symbol)
     end
 end
 
-function Base.nextfloat(x::BFloat16sr)
+function nextfloat(x::BFloat16sr)
     if isfinite(x)
 		ui = reinterpret(UInt16,x)
 		if ui < 0x8000	# positive numbers
@@ -214,7 +226,7 @@ function Base.nextfloat(x::BFloat16sr)
 	end
 end
 
-function Base.prevfloat(x::BFloat16sr)
+function prevfloat(x::BFloat16sr)
     if isfinite(x)
 		ui = reinterpret(UInt16,x)
 		if ui == 0x0000		# =zero(T)

@@ -1,11 +1,9 @@
 module StochasticRounding
 
-    export BFloat16,BFloat16sr,
-            BFloat16_stochastic_round,
-            BFloat16_chance_roundup,
-            NaNB16, InfB16,
+    export BFloat16sr,BFloat16_stochastic_round,
+            BFloat16_chance_roundup,NaNB16sr,InfB16sr,
             Float16sr,Float16_stochastic_round,
-            Float16_chance_roundup
+            Float16_chance_roundup,NaN16sr,Inf16sr
 
 	import Base: isfinite, isnan, precision, iszero,
 			sign_mask, exponent_mask, significand_mask,
@@ -15,14 +13,15 @@ module StochasticRounding
 			typemin,typemax,floatmin,floatmax,
 			==,<=,<,
 			Float16,Float32,Float64,
+			Int64,Int32,Int16,Int8,
+			UInt64,UInt32,UInt16,UInt8,
 			promote_rule, round
 
 	# faster random number generator
     using RandomNumbers.Xorshifts
     const Xor128 = Xoroshiro128Plus()
 
-    include("bfloat16.jl")
-    # using BFloat16            # to be swapped once BFloat16s.jl contains features
+	import BFloat16s.BFloat16
 
     include("bfloat16sr.jl")
     include("float16sr.jl")
