@@ -7,10 +7,13 @@ module StochasticRounding
             Float16sr,Float16_stochastic_round,
             Float16_chance_roundup
 
-    import Base: isfinite, isnan, precision, iszero,
-            sign_mask, exponent_mask, exponent_one, exponent_half,
-	        significand_mask,
-	        +, -, *, /, ^
+	import Base: isfinite, isnan, precision, iszero,
+			sign_mask, exponent_mask, significand_mask,
+			significand_bits,
+			+, -, *, /, ^,
+			nextfloat,prevfloat,one,zero,eps,
+			typemin,typemax,floatmin,floatmax,
+			==,<=,<
 
     using RandomNumbers.Xorshifts
     const Xor128 = Xoroshiro128Plus()
