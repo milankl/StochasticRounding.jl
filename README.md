@@ -20,18 +20,27 @@ As `1/3` is not exactly representable the rounding will be at 66.6% chance towar
 
 ### Performance
 
-```julia
-julia> using BFloat16s, BenchmarkTools
+```
+julia> using StochasticRounding, BenchmarkTools
 julia> A = rand(Float32,1000,1000);
 julia> B = BFloat16.(A);
 julia> C = BFloat16sr.(A);
-julia> @btime +($A,$A);
-  310.638 μs (2 allocations: 3.81 MiB)
+julia> D = Float16.(A);
+julia> E = Float16sr.(A);
+julia> @btime +($A,$A);                # Float32
+  304.975 μs (2 allocations: 3.81 MiB)
 
-julia> @btime +($B,$B);
-  567.917 μs (2 allocations: 1.91 MiB)
+julia> @btime +($B,$B);                # BFloat16
+  569.064 μs (2 allocations: 1.91 MiB)
 
-julia> @btime +($C,$C);
-  8.518 ms (8 allocations: 1.91 MiB)
+julia> @btime +($C,$C);                # BFloat16sr
+  8.354 ms (8 allocations: 1.91 MiB)
+
+julia> @btime +($D,$D);                # Float16
+  7.377 ms (2 allocations: 1.91 MiB)
+
+julia> @btime +($E,$E);                # Float16sr
+  23.423 ms (8 allocations: 1.91 MiB)
 ```
-Stochastic rounding imposes a ~x15 performance decrease.
+
+Stochastic rounding imposes a x15 performance decrease for BFloat16 and x3 for Float16.
