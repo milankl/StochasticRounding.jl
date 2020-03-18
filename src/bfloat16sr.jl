@@ -1,11 +1,3 @@
-import Base: isfinite, isnan, precision, iszero,
-	sign_mask, exponent_mask, exponent_one, exponent_half,
-	significand_mask,
-	+, -, *, /, ^
-
-using RandomNumbers.Xorshifts
-const Xor128 = Xoroshiro128Plus()
-
 primitive type BFloat16sr <: AbstractFloat 16 end		# stochastic rounding
 
 # Floating point property queries
@@ -104,7 +96,7 @@ function Base.Float32(x::BFloat16sr)
 end
 
 # Expansion to Float64
-function Base.Float64(x::BFloat16sr})
+function Base.Float64(x::BFloat16sr)
     Float64(Float32(x))
 end
 
