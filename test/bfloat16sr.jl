@@ -1,3 +1,30 @@
+@testset "Sign flip" begin
+    @test one(BFloat16sr) == -(-(one(BFloat16sr)))
+    @test zero(BFloat16sr) == -(zero(BFloat16sr))
+end
+
+@testset "Integer promotion" begin
+    f = BFloat16sr(1)
+    @test 2f == BFloat16sr(2)
+    @test 0 == BFloat16sr(0)
+end
+
+@testset "Rounding" begin
+    @test 1 == Int(round(BFloat16sr(1.2)))
+    @test 1 == Int(floor(BFloat16sr(1.2)))
+    @test 2 == Int(ceil(BFloat16sr(1.2)))
+
+    @test -1 == Int(round(BFloat16sr(-1.2)))
+    @test -2 == Int(floor(BFloat16sr(-1.2)))
+    @test -1 == Int(ceil(BFloat16sr(-1.2)))
+end
+
+@testset "Nextfloat prevfloat" begin
+    o = one(BFloat16sr)
+    @test o == nextfloat(prevfloat(o))
+    @test o == prevfloat(nextfloat(o))
+end
+
 @testset "Comparisons" begin
 
     # DETERMINISTIC ROUNDING
