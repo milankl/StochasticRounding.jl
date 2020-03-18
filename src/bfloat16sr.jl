@@ -103,6 +103,8 @@ function BFloat16_chance_roundup(x::Float32)
 end
 
 # Conversions
+Float32(x::BFloat16sr) = reinterpret(Float32, UInt32(reinterpret(UInt16, x)) << 16)
+
 BFloat16sr(x::Float64) = BFloat16sr(Float32(x))
 BFloat16sr(x::Float16) = BFloat16sr(Float32(x))
 BFloat16sr(x::Integer) = BFloat16sr(Float32(x))

@@ -214,7 +214,7 @@ end
             p2 += 1
         end
     end
-    println((p1/N,p2/N))
+
     @test p1+p2 == N
     @test p2/N > 0.05
     @test p2/N < 0.08
@@ -236,7 +236,7 @@ end
             p2 += 1
         end
     end
-    println((p1/N,p2/N))
+
     @test p1+p2 == N
     @test p2/N > 0.05
     @test p2/N < 0.08
@@ -253,7 +253,7 @@ end
             r = reinterpret(UInt32,Float32(rand(Float64))) & 0x0000_0fff
             y = reinterpret(Float32,reinterpret(UInt32,x) | r)
 
-            @test x == Float32(Float16(y))
+            @test x == Float32(Float16sr(y))
             @test x == Float32(Float16_stochastic_round(y))
         end
     end
