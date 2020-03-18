@@ -20,7 +20,7 @@ As `1/3` is not exactly representable the rounding will be at 66.6% chance towar
 
 ### Performance
 
-```
+```julia
 julia> using StochasticRounding, BenchmarkTools
 julia> A = rand(Float32,1000,1000);
 julia> B = BFloat16.(A);
