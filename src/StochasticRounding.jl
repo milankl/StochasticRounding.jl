@@ -13,8 +13,11 @@ module StochasticRounding
 			+, -, *, /, ^,
 			nextfloat,prevfloat,one,zero,eps,
 			typemin,typemax,floatmin,floatmax,
-			==,<=,<
+			==,<=,<,
+			Float16,Float32,Float64,
+			promote_rule
 
+	# faster random number generator
     using RandomNumbers.Xorshifts
     const Xor128 = Xoroshiro128Plus()
 

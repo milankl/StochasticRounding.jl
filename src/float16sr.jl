@@ -4,7 +4,7 @@ primitive type Float16sr <: AbstractFloat 16 end		# stochastic rounding
 sign_mask(::Type{Float16sr}) = 0x8000
 exponent_mask(::Type{Float16sr}) = 0x7c00
 significand_mask(::Type{Float16sr}) = 0x03ff
-precision(::Type{Float16}) = 11
+precision(::Type{Float16sr}) = 11
 
 one(::Type{Float16sr}) = reinterpret(Float16sr,0x3c00)
 zero(::Type{Float16sr}) = reinterpret(Float16sr,0x0000)
@@ -37,7 +37,6 @@ Float16(x::Float16sr) = reinterpret(Float16,x)
 Float16sr(x::Float16) = reinterpret(Float16sr,x)
 Float16sr(x::Float32) = Float16sr(Float16(x))	# deterministic
 Float16sr(x::Float64) = Float16sr(Float32(x))
-Float32(x::Float16sr) = Float32(Float16(x))
 Float32(x::Float16sr) = Float32(Float16(x))
 Float64(x::Float16sr) = Float64(Float16(x))
 
@@ -152,7 +151,7 @@ promote_rule(::Type{Float32}, ::Type{Float16sr}) = Float32
 promote_rule(::Type{Float64}, ::Type{Float16sr}) = Float64
 
 for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128)
-    @eval promote_rule(::Type{Float16}, ::Type{$t}) = Float16
+    @eval promote_rule(::Type{Float16sr}, ::Type{$t}) = Float16sr
 end
 
 widen(::Type{Float16sr}) = Float32
