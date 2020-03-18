@@ -1,7 +1,7 @@
 module StochasticRounding
 
     export BFloat16sr,BFloat16_stochastic_round,
-            BFloat16_chance_roundup,NaNB16sr,InfB16sr
+            BFloat16_chance_roundup,NaNB16sr,InfB16sr,
             Float16sr,Float16_stochastic_round,
             Float16_chance_roundup,NaN16sr,Inf16sr
 
