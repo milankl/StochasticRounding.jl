@@ -21,7 +21,7 @@ module StochasticRounding
     using RandomNumbers.Xorshifts
     const Xor128 = Xoroshiro128Plus()
 
-	using BFloat16s
+	import BFloat16s.BFloat16
 
     include("bfloat16sr.jl")
     include("float16sr.jl")

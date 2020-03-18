@@ -17,6 +17,16 @@ zero(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x0000)
 const InfB16sr = reinterpret(BFloat16sr, 0x7f80)
 const NaNB16sr = reinterpret(BFloat16sr, 0x7fc0)
 
+typemin(::Type{BFloat16sr}) = -InfB16sr
+typemax(::Type{BFloat16sr}) = InfB16sr
+floatmin(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x0080)
+floatmax(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x7f7f)
+
+typemin(::BFloat16sr) = typemin(BFloat16sr)
+typemax(::BFloat16sr) = typemax(BFloat16sr)
+floatmin(::BFloat16sr) = floatmin(BFloat16sr)
+floatmax(::BFloat16sr) = floatmax(BFloat16sr)
+
 # Truncation from Float32
 Base.uinttype(::Type{BFloat16sr}) = UInt16
 Base.trunc(::Type{BFloat16sr}, x::Float32) = reinterpret(BFloat16sr,
@@ -27,7 +37,16 @@ Base.trunc(::Type{BFloat16sr}, x::Float32) = reinterpret(BFloat16sr,
 round(x::BFloat16sr, r::RoundingMode{:Up}) = BFloat16sr(ceil(Float32(x)))
 round(x::BFloat16sr, r::RoundingMode{:Down}) = BFloat16sr(floor(Float32(x)))
 round(x::BFloat16sr, r::RoundingMode{:Nearest}) = BFloat16sr(round(Float32(x)))
+
+# conversion to integer
 Int64(x::BFloat16sr) = Int64(Float32(x))
+Int32(x::BFloat16sr) = Int32(Float32(x))
+Int16(x::BFloat16sr) = Int16(Float32(x))
+Int8(x::BFloat16sr) = Int8(Float32(x))
+UInt64(x::BFloat16sr) = UInt64(Float32(x))
+UInt32(x::BFloat16sr) = UInt32(Float32(x))
+UInt16(x::BFloat16sr) = UInt16(Float32(x))
+UInt8(x::BFloat16sr) = UInt8(Float32(x))
 
 """
     epsBF16
@@ -83,25 +102,13 @@ function BFloat16_chance_roundup(x::Float32)
     return frac
 end
 
-# Conversion from Float64
-function BFloat16sr(x::Float64)
-	BFloat16sr(Float32(x))
-end
+# Conversions
+BFloat16sr(x::Float64) = BFloat16sr(Float32(x))
+BFloat16sr(x::Float16) = BFloat16sr(Float32(x))
+BFloat16sr(x::Integer) = BFloat16sr(Float32(x))
 
-# Conversion from Integer
-function BFloat16sr(x::Integer)
-	convert(BFloat16sr, convert(Float32, x))
-end
-
-# Expansion to Float32 - no rounding applied
-function Base.Float32(x::BFloat16sr)
-    reinterpret(Float32, UInt32(reinterpret(UInt16, x)) << 16)
-end
-
-# Expansion to Float64
-function Base.Float64(x::BFloat16sr)
-    Float64(Float32(x))
-end
+Float64(x::BFloat16sr) = Float64(Float32(x))
+Float16(x::BFloat16sr) = Float16(Float32(x))
 
 # conversion between BFloat16 and BFloat16sr
 BFloat16(x::BFloat16sr) = reinterpret(BFloat16,x)
