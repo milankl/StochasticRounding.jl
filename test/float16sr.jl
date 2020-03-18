@@ -9,6 +9,16 @@ end
     @test 0 == Float16sr(0)
 end
 
+@testset "Rounding" begin
+    @test 1 == Int(round(Float16sr(1.2)))
+    @test 1 == Int(floor(Float16sr(1.2)))
+    @test 2 == Int(ceil(Float16sr(1.2)))
+
+    @test -1 == Int(round(Float16sr(-1.2)))
+    @test -2 == Int(floor(Float16sr(-1.2)))
+    @test -1 == Int(ceil(Float16sr(-1.2)))
+end
+
 @testset "Nextfloat prevfloat" begin
     o = one(Float16sr)
     @test o == nextfloat(prevfloat(o))
