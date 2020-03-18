@@ -1,3 +1,14 @@
+@testset "Sign flip" begin
+    @test one(Float16sr) == -(-(one(Float16sr)))
+    @test zero(Float16sr) == -(zero(Float16sr))
+end
+
+@testset "Integer promotion" begin
+    f = Float16sr(1)
+    @test 2f == Float16sr(2)
+    @test 0 == Float16sr(0)
+end
+
 @testset "Nextfloat prevfloat" begin
     o = one(Float16sr)
     @test o == nextfloat(prevfloat(o))

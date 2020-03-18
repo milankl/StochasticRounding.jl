@@ -32,6 +32,8 @@ isfinite(x::Float16sr) = reinterpret(UInt16,x) & 0x7c00 != 0x7c00
 nextfloat(x::Float16sr) = Float16sr(nextfloat(Float16(x)))
 prevfloat(x::Float16sr) = Float16sr(prevfloat(Float16(x)))
 
+-(x::Float16sr) = reinterpret(Float16sr, reinterpret(UInt16, x) ⊻ sign_mask(Float16sr))
+
 # conversions
 Float16(x::Float16sr) = reinterpret(Float16,x)
 Float16sr(x::Float16) = reinterpret(Float16sr,x)
