@@ -90,6 +90,7 @@ const epsF16_half = epsF16/2
 const eps_quarter = 0x00004000						# a quarter of eps as Float32 sig bits
 const F32_one = reinterpret(UInt32,one(Float32))
 const F16floatmin = reinterpret(UInt32,Float32(floatmin(Float16)))
+const sbitsF32 = 23
 
 function Float16_stochastic_round(x::Float32)
 	isnan(x) && return NaN16
@@ -116,7 +117,7 @@ function Float16_stochastic_round(x::Float32)
 
 	ui = reinterpret(UInt32,x)
 	# change exponent bits
-    i = ((ui & ~significand_mask(Float32)) >> significand_bits(Float32)) + 1
+    i = ((ui & ~significand_mask(Float32)) >> sbitsF32) + 1
     @inbounds sh = shifttable[i]
     ui &= significand_mask(Float32)
     # If x is subnormal, the tables are set up to force the
