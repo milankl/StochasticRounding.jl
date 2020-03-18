@@ -15,7 +15,7 @@ module StochasticRounding
 			typemin,typemax,floatmin,floatmax,
 			==,<=,<,
 			Float16,Float32,Float64,
-			promote_rule
+			promote_rule, round
 
 	# faster random number generator
     using RandomNumbers.Xorshifts
