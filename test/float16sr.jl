@@ -1,5 +1,3 @@
-using Test
-
 @testset "Nextfloat prevfloat" begin
     o = one(Float16sr)
     @test o == nextfloat(prevfloat(o))
