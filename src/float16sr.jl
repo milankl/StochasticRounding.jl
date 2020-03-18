@@ -24,6 +24,9 @@ floatmax(::Float16sr) = floatmax(Float16sr)
 eps(::Type{Float16sr}) = Float16sr(eps(Float16))
 eps(x::Float16sr) = Float16sr(eps(Float16(x)))
 
+const Inf16sr = reinterpret(Float16sr, Inf16)
+const NaN16sr = reinterpret(Float16sr, NaN16)
+
 # basic operations
 abs(x::Float16sr) = reinterpret(Float16sr, reinterpret(UInt16, x) & 0x7fff)
 isnan(x::Float16sr) = reinterpret(UInt16,x) & 0x7fff > 0x7c00
@@ -94,7 +97,7 @@ const F16floatmin = reinterpret(UInt32,Float32(floatmin(Float16)))
 const sbitsF32 = 23
 
 function Float16_stochastic_round(x::Float32)
-	isnan(x) && return NaN16
+	isnan(x) && return NaN16sr
 
 	ui = reinterpret(UInt32, x)
 
@@ -140,7 +143,7 @@ function Float16_stochastic_round(x::Float32)
 end
 
 function Float16_chance_roundup(x::Float32)
-	isnan(x) && return NaN16
+	isnan(x) && return NaN16sr
 	ui = reinterpret(UInt32, x)
 	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float32)
@@ -193,7 +196,7 @@ end
 
 
 # Showing
-function Base.show(io::IO, x::Float16sr)
+function show(io::IO, x::Float16sr)
     if isinf(x)
         print(io, x < 0 ? "-Inf16" : "Inf16")
     elseif isnan(x)
@@ -206,9 +209,9 @@ function Base.show(io::IO, x::Float16sr)
     end
 end
 
-Base.bitstring(x::Float16sr) = bitstring(reinterpret(UInt16,x))
+bitstring(x::Float16sr) = bitstring(reinterpret(UInt16,x))
 
-function Base.bitstring(x::Float16sr,mode::Symbol)
+function bitstring(x::Float16sr,mode::Symbol)
     if mode == :split	# split into sign, exponent, signficand
         s = bitstring(x)
 		return "$(s[1]) $(s[2:6]) $(s[7:end])"
