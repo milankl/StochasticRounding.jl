@@ -248,7 +248,7 @@ end
 
         x = Float32(reinterpret(Float16,hex))
 
-        for i = [1]
+        for i = 1:10
             # random bits < eps/2 that should be round down
             r = reinterpret(UInt32,Float32(rand(Float64))) & 0x0000_0fff
             y = reinterpret(Float32,reinterpret(UInt32,x) | r)
