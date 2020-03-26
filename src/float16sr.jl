@@ -91,8 +91,6 @@ end
 
 const epsF16 = Float32(eps(Float16))
 const epsF16_half = epsF16/2
-const eps_quarter = 0x00004000						# a quarter of eps as Float32 sig bits
-const F32_one = reinterpret(UInt32,one(Float32))
 const F16floatmin = reinterpret(UInt32,Float32(floatmin(Float16)))
 const sbitsF32 = 23
 
