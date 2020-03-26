@@ -2,7 +2,7 @@
 
 # StochasticRounding
 
-This package exports `Float16sr` and `BFloat16sr`. Two number formats that behave like their deterministic counterparts but with stochastic rounding that is proportional to the distance of the next representable numbers and therefore [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding) (see also example below in "Usage"). Although there is currently no known hardware implementation available, [Graphcore is working on IPUs with stochastic rounding](https://www.graphcore.ai/posts/directions-of-ai-research). Stochastic rounding makes the current `Float16`/`BFloat16` software implementations considerably slower, but only x15/x3, respectively. [Xoroshio128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package.
+This package exports `Float32sr`,`Float16sr` and `BFloat16sr`. Three number formats that behave like their deterministic counterparts but with stochastic rounding that is proportional to the distance of the next representable numbers and therefore [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding) (see also example below in "Usage"). Although there is currently no known hardware implementation available, [Graphcore is working on IPUs with stochastic rounding](https://www.graphcore.ai/posts/directions-of-ai-research). Stochastic rounding makes the current `Float16`/`BFloat16` software implementations considerably slower, but less than <10x currently. [Xoroshio128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package.
 
 Stochastic rounding is only applied on arithmetic operations, and not on type conversions or for subnormal numbers (standard round to nearest instead).
 
@@ -29,27 +29,35 @@ For stochastic rounding only at 80% chance x is round down, in 20% chance it is 
 
 ### Performance
 
+Define a few random 1000x1000 matrices
 ```julia
-julia> using StochasticRounding, BenchmarkTools
+julia> using StochasticRounding, BenchmarkTools, BFloat16s
 julia> A = rand(Float32,1000,1000);
-julia> B = BFloat16.(A);
-julia> C = BFloat16sr.(A);
-julia> D = Float16.(A);
-julia> E = Float16sr.(A);
-julia> @btime +($A,$A);                # Float32
-  304.975 μs (2 allocations: 3.81 MiB)
+julia> B = Float32sr.(A);
+julia> C = BFloat16.(A);
+julia> D = BFloat16sr.(A);
+julia> E = Float16.(A);
+julia> F = Float16sr.(A);
+```
+Then on an Intel(R) Xeon(R) CPU E5-2698 v3 @ 2.30GHz timings are
+```julia
+julia> @btime +($A,$A);     # Float32
+  506.308 μs (2 allocations: 3.81 MiB)
 
-julia> @btime +($B,$B);                # BFloat16
-  569.064 μs (2 allocations: 1.91 MiB)
+julia> @btime +($B,$B);     # Float32sr
+  3.663 ms (2 allocations: 3.81 MiB)
 
-julia> @btime +($C,$C);                # BFloat16sr
-  8.354 ms (8 allocations: 1.91 MiB)
+julia> @btime +($C,$C);     # BFloat16
+  752.281 μs (2 allocations: 1.91 MiB)
 
-julia> @btime +($D,$D);                # Float16
-  7.377 ms (2 allocations: 1.91 MiB)
+julia> @btime +($D,$D);     # BFloat16sr
+  6.247 ms (2 allocations: 1.91 MiB)
 
-julia> @btime +($E,$E);                # Float16sr
-  23.423 ms (8 allocations: 1.91 MiB)
+julia> @btime +($E,$E);     # Float16
+  8.884 ms (2 allocations: 1.91 MiB)
+
+julia> @btime +($F,$F);     # Float16sr
+  21.464 ms (2 allocations: 1.91 MiB)
 ```
 
-Stochastic rounding imposes a x15 performance decrease for BFloat16 and x3 for Float16.
+Stochastic rounding imposes a x7 performance decrease for Float32, x8 performance decrease for BFloat16 and x2.4 for Float16.
