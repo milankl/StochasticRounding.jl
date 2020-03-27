@@ -18,7 +18,7 @@ module StochasticRounding
 			Int64,Int32,Int16,Int8,
 			UInt64,UInt32,UInt16,UInt8,
 			promote_rule, round,
-			show
+			bitstring,show
 
 	# faster random number generator
     using RandomNumbers.Xorshifts

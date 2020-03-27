@@ -94,6 +94,32 @@ const epsF16_half = epsF16/2
 const F16floatmin = reinterpret(UInt32,Float32(floatmin(Float16)))
 const sbitsF32 = 23
 
+# function Float16_stochastic_round_subnormal(x::Float32)
+# 	isnan(x) && return NaN16sr
+#
+# 	ui = reinterpret(UInt32, x)
+#
+# 	# stochastic rounding
+# 	# e is the base 2 exponent of x (sign and signficand set to zero)
+# 	e = reinterpret(Float32,ui & exponent_mask(Float32))
+#
+# 	# sig is the signficand (exponents & sign is masked out)
+# 	sig = ui & significand_mask(Float32)
+#
+# 	# special case for rounding within 2^n <= x < 2^n+nextfloat(2^n)/4 due to doubling of eps towards nextfloat
+# 	q = sig < eps_quarter
+#
+# 	# Check whether Float32 value would map to Float16 subnormals - no stochastic rounding in this case
+# 	s = ui & ~sign_mask(Float32) < F16floatmin
+# 	subnormal_mask = s ? 0f0 : 1f0
+#
+# 	frac = q ? reinterpret(Float32,F32_one | (sig << 10)) - 1f0 : 0.5f0
+# 	eps = q ? epsF16_half : epsF16
+# 	x += subnormal_mask*e*eps*(rand(Xor128,Float32) - frac)
+#
+#     return Float16sr(x)
+# end
+
 function Float16_stochastic_round(x::Float32)
 	isnan(x) && return NaN16sr
 
@@ -109,35 +135,11 @@ function Float16_stochastic_round(x::Float32)
 	# special case for rounding within 2^n <= x < 2^n+nextfloat(2^n)/4 due to doubling of eps towards nextfloat
 	q = sig < eps_quarter
 
-	# Check whether Float32 value would map to Float16 subnormals - no stochastic rounding in this case
-	s = ui & ~sign_mask(Float32) < F16floatmin
-	subnormal_mask = s ? 0f0 : 1f0
-
 	frac = q ? reinterpret(Float32,F32_one | (sig << 10)) - 1f0 : 0.5f0
 	eps = q ? epsF16_half : epsF16
-	x += subnormal_mask*e*eps*(rand(Xor128,Float32) - frac)
+	x += e*eps*(rand(Xor128,Float32) - frac)
 
-	ui = reinterpret(UInt32,x)
-	# change exponent bits
-    i = ((ui & ~significand_mask(Float32)) >> sbitsF32) + 1
-    @inbounds sh = shifttable[i]
-    ui &= significand_mask(Float32)
-    # If x is subnormal, the tables are set up to force the
-    # result to 0, so the significand has an implicit `1` in the
-    # cases we care about.
-    ui |= significand_mask(Float32) + 0x1
-    @inbounds h = (basetable[i] + (ui >> sh) & significand_mask(Float16sr)) % UInt16
-    # round
-    # NOTE: we maybe should ignore NaNs here, but the payload is
-    # getting truncated anyway so "rounding" it might not matter
-    nextbit = (ui >> (sh-1)) & 1
-    if nextbit != 0 && (h & 0x7C00) != 0x7C00
-        # Round halfway to even or check lower bits
-        if h & 1 == 1 || (ui & ((1<<(sh-1))-1)) != 0
-            h += UInt16(1)
-        end
-    end
-    reinterpret(Float16sr, h)
+    return Float16sr(x)
 end
 
 function Float16_chance_roundup(x::Float32)
