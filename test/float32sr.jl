@@ -224,16 +224,14 @@ end
 
 @testset "Subnormals are deterministically round" begin
 
-    for hex in 0x0000_0001:0x0000_ffff    # test for some subnormals of Float32
+    for hex in 0x0000_0001:0x0000_000f:0x007f_ffff    # test for some subnormals of Float32
 
         x = Float64(reinterpret(Float32,hex))
 
-        for i = 1:5
-            # random bits < eps/2 that should be round down
-            r = reinterpret(UInt64,rand(Float64)) & 0x0000_0000_0fff_ffff
-            y = reinterpret(Float64,reinterpret(UInt64,x) | r)
+        # random bits < eps/2 that should be round down
+        r = reinterpret(UInt64,rand(Float64)) & 0x0000_0000_0fff_ffff
+        y = reinterpret(Float64,reinterpret(UInt64,x) | r)
 
-            @test x == Float64(Float32_stochastic_round(y))
-        end
+        @test x == Float64(Float32_stochastic_round(y))
     end
 end
