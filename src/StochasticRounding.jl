@@ -20,9 +20,9 @@ module StochasticRounding
 			promote_rule, round,
 			bitstring,show
 
-	# faster random number generator
+	# faster random number generator, seed with non-zero random 64 bits
     using RandomNumbers.Xorshifts
-    const Xor128 = Xoroshiro128Plus()
+    const Xor128 = Xoroshiro128Plus(rand(UInt64) |  0x1)
 
 	import BFloat16s.BFloat16
 
