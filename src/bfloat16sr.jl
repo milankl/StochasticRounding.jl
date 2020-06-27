@@ -85,7 +85,7 @@ function BFloat16_stochastic_round(x::Float32)
 	q = sig < eps_quarter
 	frac = q ? reinterpret(Float32,F32_one | (sig << 7)) - 1f0 : 0.5f0
 	eps = q ? epsBF16_half : epsBF16
-	x += e*eps*(rand(Xor128,Float32) - frac)
+	x += e*eps*(rand(Xor128[],Float32) - frac)
 
     # Round to nearest after stochastic perturbation
 	ui = reinterpret(UInt32, x)

@@ -68,7 +68,7 @@ function Float32_stochastic_round(x::Float64)
 	q = sig < eps64_quarter
 	frac = q ? reinterpret(Float64,F64_one | (sig << 23)) - 1.0 : 0.5
 	eps = q ? epsF32_half : epsF32
-	x += e*eps*(rand(Xor128,Float64) - frac)
+	x += e*eps*(rand(Xor128[],Float64) - frac)
 
     return Float32sr(x)
 end

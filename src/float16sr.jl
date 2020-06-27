@@ -137,7 +137,7 @@ function Float16_stochastic_round(x::Float32)
 
 	frac = q ? reinterpret(Float32,F32_one | (sig << 10)) - 1f0 : 0.5f0
 	eps = q ? epsF16_half : epsF16
-	x += e*eps*(rand(Xor128,Float32) - frac)
+	x += e*eps*(rand(Xor128[],Float32) - frac)
 
     return Float16sr(x)
 end
