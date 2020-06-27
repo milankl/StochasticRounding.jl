@@ -30,6 +30,7 @@ module StochasticRounding
 
     function seed(i::Integer)
         Xor128[] = Xoroshiro128Plus(UInt64(i))
+		return nothing
     end
 
 	import BFloat16s.BFloat16

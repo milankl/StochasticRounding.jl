@@ -2,7 +2,7 @@ primitive type Float32sr <: AbstractFloat 32 end		# stochastic rounding
 
 # basic properties
 sign_mask(::Type{Float32sr}) = 0x8000_0000
-exponent_mask(::Type{Float32sr}) = 0x7f800_0000
+exponent_mask(::Type{Float32sr}) = 0x7f80_0000
 significand_mask(::Type{Float32sr}) = 0x007f_ffff
 precision(::Type{Float32sr}) = 24
 
@@ -64,7 +64,8 @@ function Float32_stochastic_round(x::Float64)
 	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float64)
 
-	# special case for rounding within 2^n <= x < 2^n+nextfloat(2^n)/4 due to doubling of eps towards nextfloat
+	# special case for rounding within 2^n <= x < 2^n+nextfloat(2^n)/4 due to
+	# doubling of eps towards nextfloat
 	q = sig < eps64_quarter
 	frac = q ? reinterpret(Float64,F64_one | (sig << 23)) - 1.0 : 0.5
 	eps = q ? epsF32_half : epsF32
