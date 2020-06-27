@@ -18,6 +18,15 @@ BFloat16sr(0.33203125)
 ```
 As `1/3` is not exactly representable the rounding will be at 66.6% chance towards 0.33398438 and at 33.3% towards 0.33203125 such that in expectation the result is 0.33333... and therefore exact. You can use `BFloat16_chance_roundup(x::Float32)` to get the chance that `x` will be round up.
 
+From v0.3 onwards the random number generator is randomly seeded on every `import`
+or `using` such that running the same calculations twice, will, in general, not
+yield bit-reproducible results. However, you can seed the random number generator
+at any time with any integer larger than zero as follows
+
+```julia
+julia> StochasticRounding.seed(2156712)
+```
+
 ### Theory
 
 Round nearest (tie to even) is the standard rounding mode for IEEE floats. Stochastic rounding is explained in the following schematic
