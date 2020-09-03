@@ -77,7 +77,7 @@ function Float32_stochastic_round(x::Float64)
 	# However, there is a special case (aka the "quarter-case") for rounding
 	# below ulp/4 when x0 is 2^n for any n (i.e. above an exponent bit flip)
 	# due to doubling of ulp towards x1.
-	q = sig < eps64_quarter		# true for special case false otherwise
+	quartercase = sig < eps64_quarter	# true for special case false otherwise
 
 	# frac is in most cases 0.5 to shift the randum number [0,1) to [-0.5,0.5)
 	# However, in the special case frac is (x-x0)/(x1-x0), that means the fraction

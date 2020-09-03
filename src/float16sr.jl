@@ -129,8 +129,8 @@ function Float16_stochastic_round(x::Float32)
 	# 1 -- x --1/4--   --1/2--   --   --   -- 2
 	# 1  (-x-----------------)                2
 	# i.e. starting from 1/16 up to 1/2+1/16
-	frac = q ? reinterpret(Float32,F32_one | (sig << 10)) - 1f0 : 0.5f0
-	eps = q ? epsF16_half : epsF16
+	frac = quartercase ? reinterpret(Float32,F32_one | (sig << 10)) - 1f0 : 0.5f0
+	eps = quartercase ? epsF16_half : epsF16
 
 	# stochastically perturb x before rounding (equiv to stochastic rounding)
 	x += e*eps*(rand(Xor128[],Float32) - frac)
