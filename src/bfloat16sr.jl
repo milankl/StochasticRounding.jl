@@ -95,10 +95,10 @@ function BFloat16_stochastic_round(x::Float32)
 	# such that e.g. x = x0 + ulp/8 gets perturbed to be in [x0+ulp/4,x0+5/8*ulp)
 	# and so the chance of a round-up is
 
-	adjusts the perturbation in the below-eps/4 case to be asymmetric
+	# adjusts the perturbation in the below-eps/4 case to be asymmetric
 	# otherwise frac is 0.5 such that the perturbation is within (-eps/2,eps/2)
-	frac = q ? reinterpret(Float32,F32_one | (sig << 7)) - 1f0 : 0.5f0
-	eps = q ? epsBF16_half : epsBF16	# in this case use eps/2 from previous exponent
+	frac = quartercase ? reinterpret(Float32,F32_one | (sig << 7)) - 1f0 : 0.5f0
+	eps = quartercase ? epsBF16_half : epsBF16	# in this case use eps/2
 
 	# stochastically perturb x before rounding (equiv to stochastic rounding)
 	x += e*eps*(rand(Xor128[],Float32) - frac)					# (*)
