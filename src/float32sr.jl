@@ -64,7 +64,7 @@ function Float32_stochastic_round(x::Float64)
 
 	# stochastic rounding
 	# e is the base 2 exponent of x (sign and signficand set to zero)
-	e = reinterpret(Float64,ui & exponent_mask(Float64))
+	e = reinterpret(Float64,ui & signexp_mask(Float64))
 
 	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float64)

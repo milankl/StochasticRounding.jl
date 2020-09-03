@@ -198,7 +198,7 @@ end
     @test p1/N < 0.925
 end
 
-@testset "-1-eps/8 is round 12.5% up" begin
+@testset "-1-eps/8 is round 12.5% away from zero" begin
 
     p1 = 0
     p2 = 0

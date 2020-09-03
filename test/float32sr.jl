@@ -178,7 +178,7 @@ end
     @test p1/N < 0.925
 end
 
-@testset "-1-eps/8 is round 12.5% up" begin
+@testset "-1-eps/8 is round 12.5% away from zero" begin
 
     p1 = 0
     p2 = 0
@@ -190,7 +190,7 @@ end
         f = Float32(Float32_stochastic_round(x))
         if -1.0f0 == f
             p1 += 1
-        elseif -1 - e == f
+        elseif -1-e == f
             p2 += 1
         end
     end
