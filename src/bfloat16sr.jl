@@ -1,4 +1,5 @@
-primitive type BFloat16sr <: AbstractFloat 16 end		# stochastic rounding
+"""The BFloat16 + stochastic rounding type."""
+primitive type BFloat16sr <: AbstractFloat 16 end
 
 # Floating point property queries
 for f in (:sign_mask, :exponent_mask, :exponent_one,
@@ -91,17 +92,18 @@ function BFloat16_stochastic_round(x::Float32)
 
 	# However, in the special case frac is (x-x0)/(x1-x0), that means the fraction
 	# of the distance where x is in between x0 and x1
-	# Then shift the random number [0,1) to be [frac,frac+ulp/2)
-	# such that e.g. x = x0 + ulp/8 gets perturbed to be in [x0+ulp/4,x0+5/8*ulp)
-	# and so the chance of a round-up is
-
-	# adjusts the perturbation in the below-eps/4 case to be asymmetric
-	# otherwise frac is 0.5 such that the perturbation is within (-eps/2,eps/2)
+	# Then shift the random number [0,1) to be [-frac/2,-frac/2+ulp/2)
+	# such that e.g. x = x0 + ulp/8 gets perturbed to be in [x0+ulp/16,x0+ulp/16+ulp/2)
+	# and so the chance of a round-up is indeed 1/8
+	# Illustration, let x be at 1/8, then perturb such that x can be in (--)
+	# 1 -- x --1/4--   --1/2--   --   --   -- 2
+	# 1  (-x-----------------)                2
+	# i.e. starting from 1/16 up to 1/2+1/16
 	frac = quartercase ? reinterpret(Float32,F32_one | (sig << 7)) - 1f0 : 0.5f0
 	eps = quartercase ? epsBF16_half : epsBF16	# in this case use eps/2
 
 	# stochastically perturb x before rounding (equiv to stochastic rounding)
-	x += e*eps*(rand(Xor128[],Float32) - frac)					# (*)
+	x += e*eps*(rand(Xor128[],Float32) - frac)
 
     # Round to nearest after stochastic perturbation
     return BFloat16sr(x)
