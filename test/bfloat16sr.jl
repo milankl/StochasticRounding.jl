@@ -182,6 +182,29 @@ end
     @test p1/N < 0.925
 end
 
+@testset "-1-eps/8 is round 12.5% away from zero (i.e. down)" begin
+
+    p1 = 0
+    p2 = 0
+    N = 100000
+
+    eps = 0.0078125f0
+    x = -1 - eps/8
+
+    for i = 1:N
+        f = Float32(BFloat16_stochastic_round(x))
+        if -1.0f0 == f
+            p1 += 1
+        elseif -1 - eps == f
+            p2 += 1
+        end
+    end
+    println((p1/N,p2/N))
+    @test p1+p2 == N
+    @test p1/N > 0.825
+    @test p1/N < 0.925
+end
+
 @testset "1+eps/16 is round 6.25% up" begin
 
     p1 = 0

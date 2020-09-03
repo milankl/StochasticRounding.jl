@@ -1,10 +1,14 @@
-primitive type Float32sr <: AbstractFloat 32 end		# stochastic rounding
+"""The Float32 + stochastic rounding type."""
+primitive type Float32sr <: AbstractFloat 32 end
 
 # basic properties
 sign_mask(::Type{Float32sr}) = 0x8000_0000
 exponent_mask(::Type{Float32sr}) = 0x7f80_0000
 significand_mask(::Type{Float32sr}) = 0x007f_ffff
 precision(::Type{Float32sr}) = 24
+
+"""Mask for both sign and exponent bits. Equiv to ~significand_mask(Float64)."""
+signexp_mask(::Type{Float64}) = 0xfff0_0000_0000_0000
 
 one(::Type{Float32sr}) = reinterpret(Float32sr,one(Float32))
 zero(::Type{Float32sr}) = reinterpret(Float32sr,0x0000_0000)
@@ -53,27 +57,49 @@ const epsF32_half = epsF32/2
 const eps64_quarter = 0x0000_0000_4000_0000		# a quarter of eps as Float64 sig bits
 const F64_one = reinterpret(UInt64,one(Float64))
 
+"""Convert to Float32sr from Float64 with stochastic rounding."""
 function Float32_stochastic_round(x::Float64)
 
 	ui = reinterpret(UInt64, x)
 
 	# stochastic rounding
 	# e is the base 2 exponent of x (sign and signficand set to zero)
-	e = reinterpret(Float64,ui & exponent_mask(Float64))
+	e = reinterpret(Float64,ui & signexp_mask(Float64))
 
 	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float64)
 
-	# special case for rounding within 2^n <= x < 2^n+nextfloat(2^n)/4 due to
-	# doubling of eps towards nextfloat
-	q = sig < eps64_quarter
-	frac = q ? reinterpret(Float64,F64_one | (sig << 23)) - 1.0 : 0.5
-	eps = q ? epsF32_half : epsF32
+	# STOCHASTIC ROUNDING
+	# In most cases, perturb any x between x0 and x1 with a random number
+	# that is in (-ulp/2,ulp/2) where ulp is the distance between x0 and x1.
+	# ulp = e*eps, with e the next base 2 exponent to zero from x.
+
+	# However, there is a special case (aka the "quarter-case") for rounding
+	# below ulp/4 when x0 is 2^n for any n (i.e. above an exponent bit flip)
+	# due to doubling of ulp towards x1.
+	quartercase = sig < eps64_quarter	# true for special case false otherwise
+
+	# frac is in most cases 0.5 to shift the randum number [0,1) to [-0.5,0.5)
+	# However, in the special case frac is (x-x0)/(x1-x0), that means the fraction
+	# of the distance where x is in between x0 and x1
+	# Then shift the random number [0,1) to be [-frac/2,-frac/2+ulp/2)
+	# such that e.g. x = x0 + ulp/8 gets perturbed to be in [x0+ulp/16,x0+ulp/16+ulp/2)
+	# and so the chance of a round-up is indeed 1/8
+	# Illustration, let x be at 1/8, then perturb such that x can be in (--)
+	# 1 -- x --1/4--   --1/2--   --   --   -- 2
+	# 1  (-x-----------------)                2
+	# i.e. starting from 1/16 up to 1/2+1/16
+	frac = quartercase ? reinterpret(Float64,F64_one | (sig << 23)) - 1.0 : 0.5
+	eps = quartercase ? epsF32_half : epsF32
+
+	# stochastically perturb x before rounding (equiv to stochastic rounding)
 	x += e*eps*(rand(Xor128[],Float64) - frac)
 
+    # Round to nearest after stochastic perturbation
     return Float32sr(x)
 end
 
+"""Chance that x::Float64 is round up when converted to Float32sr."""
 function Float32_chance_roundup(x::Float64)
 	isnan(x) && return NaN32sr
 	ui = reinterpret(UInt64, x)
