@@ -48,32 +48,15 @@ where `]` opens the package manager.
 Define a few random 1000x1000 matrices
 ```julia
 julia> using StochasticRounding, BenchmarkTools, BFloat16s
-julia> A = rand(Float32,1000,1000);
-julia> B = Float32sr.(A);
-julia> C = BFloat16.(A);
-julia> D = BFloat16sr.(A);
-julia> E = Float16.(A);
-julia> F = Float16sr.(A);
+julia> A1 = rand(Float32,1000,1000);
+julia> A2 = rand(Float32,1000,1000);   # A1, A2 shouldn't be identical as a+a=2a is not round
+julia> B1,B2 = Float32sr.(A1),Float32sr.(A2);
 ```
-Then on an Intel(R) Xeon(R) CPU E5-2698 v3 @ 2.30GHz timings are
-```julia
-julia> @btime +($A,$A);     # Float32
-  506.308 μs (2 allocations: 3.81 MiB)
+And similarly for the other number types. Then on an Intel(R) Core(R) i5 (Ice Lake) @ 1.1GHz timings via `@btime +($A1,$A2)` etc. are
 
-julia> @btime +($B,$B);     # Float32sr
-  3.663 ms (2 allocations: 3.81 MiB)
+| rounding mode         | Float32    | BFloat16   | Float16   |
+| --------------------- | ---------- | ---------- | --------- |
+| default               | 424.639 μs | 557.777 μs | 16.446 ms | 
+| + stochastic rounding | 3.622 ms   | 4.985 ms   | 21.350 ms |
 
-julia> @btime +($C,$C);     # BFloat16
-  752.281 μs (2 allocations: 1.91 MiB)
-
-julia> @btime +($D,$D);     # BFloat16sr
-  6.247 ms (2 allocations: 1.91 MiB)
-
-julia> @btime +($E,$E);     # Float16
-  8.884 ms (2 allocations: 1.91 MiB)
-
-julia> @btime +($F,$F);     # Float16sr
-  21.464 ms (2 allocations: 1.91 MiB)
-```
-
-Stochastic rounding imposes a x7 performance decrease for Float32, x8 performance decrease for BFloat16 and x2.4 for Float16.
+Stochastic rounding adds about 3-5ms and imposes a x8 performance decrease for Float32, x9 performance decrease for BFloat16 and x1.3 for Float16.
