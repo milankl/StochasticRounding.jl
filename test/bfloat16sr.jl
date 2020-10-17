@@ -253,12 +253,12 @@ end
 
 @testset "Stochastic round for subnormals" begin
 
-    ulp_half = Float32(reinterpret(BFloat16,0x0001))/2
+    ulp_half = Float32(reinterpret(BFloat16sr,0x0001))/2
 
     for hex in 0x0000:0x008f    # test for all subnormals of Float16
 
         # add ulp/2 to have stochastic rounding that is 50/50 up/down.
-        x = Float32(reinterpret(BFloat16,hex)) + ulp_half
+        x = Float32(reinterpret(BFloat16sr,hex)) + ulp_half
 
         p1 = 0
         p2 = 0
