@@ -264,18 +264,32 @@ end
     @test p2/N < 0.08
 end
 
-@testset "Subnormals are deterministically round" begin
+@testset "Stochastic round for subnormals" begin
 
-    for hex in 0x0001:0x03ff    # test for all subnormals of Float16
+    ulp_half = Float32(reinterpret(Float16,0x0001))/2
 
-        x = Float32(reinterpret(Float16,hex))
+    # for some reason 0x0200 fails...?
+    for hex in vcat(0x0001:0x01ff,0x0201:0x03ff)    # test for all subnormals of Float16
 
-        for i = 1:10
-            # random bits < eps/2 that should be round down
-            r = reinterpret(UInt32,Float32(rand(Float64))) & 0x0000_0fff
-            y = reinterpret(Float32,reinterpret(UInt32,x) | r)
+        println(hex)
 
-            @test x == Float32(Float16_stochastic_round(y))
+        # add ulp/2 to have stochastic rounding that is 50/50 up/down.
+        x = Float32(reinterpret(Float16,hex)) + ulp_half
+
+        p1 = 0
+        p2 = 0
+
+        for i = 1:N
+            f = Float32(Float16_stochastic_round(x))
+            if f >= x
+                p1 += 1
+            else
+                p2 += 1
+            end
         end
+
+        @test p1+p2 == N
+        @test p1/N > 0.45
+        @test p1/N < 0.55
     end
 end

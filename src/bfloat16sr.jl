@@ -56,6 +56,10 @@ const epsBF16_half = epsBF16/2						# half the machine epsilon
 const eps_quarter = 0x0000_4000						# a quarter of eps as Float32 sig bits
 const F32_one = reinterpret(UInt32,one(Float32))	# Float32 one as UInt32
 
+# The smallest non-subnormal exponent of BFloat16 as Float32 reinterpreted as UInt32
+# floatmin(Float32) = floatmin(BFloat16)
+const min_expBF16 = reinterpret(UInt32,floatmin(Float32))
+
 """Convert to BFloat16sr from Float32 via round-to-nearest
 and tie to even. Identical to BFloat16(::Float32)."""
 function BFloat16sr(x::Float32)
@@ -71,9 +75,11 @@ function BFloat16_stochastic_round(x::Float32)
 
 	ui = reinterpret(UInt32, x)
 
-	# e is the base 2 exponent of x (with sign, signficand is set to zero)
+	# e is the base 2 exponent of x (with signficand is set to zero)
 	# e.g. e is 2 for pi, e is -2 for -pi, e is 0.25 for 0.3
-	e = reinterpret(Float32,ui & signexp_mask(Float32))
+	# e is at least min_exp for stochastic rounding for subnormals
+	e = (ui & sign_mask(Float32)) | max(min_expBF16,ui & exponent_mask(Float32))
+	e = reinterpret(Float32,e)
 
 	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float32)
