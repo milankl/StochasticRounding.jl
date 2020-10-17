@@ -56,6 +56,7 @@ const epsF32 = Float64(eps(Float32))
 const epsF32_half = epsF32/2
 const eps64_quarter = 0x0000_0000_4000_0000		# a quarter of eps as Float64 sig bits
 const F64_one = reinterpret(UInt64,one(Float64))
+const min_exp = reinterpret(UInt64,Float64(floatmin(Float32)))
 
 """Convert to Float32sr from Float64 with stochastic rounding."""
 function Float32_stochastic_round(x::Float64)
@@ -63,8 +64,10 @@ function Float32_stochastic_round(x::Float64)
 	ui = reinterpret(UInt64, x)
 
 	# stochastic rounding
-	# e is the base 2 exponent of x (sign and signficand set to zero)
-	e = reinterpret(Float64,ui & signexp_mask(Float64))
+	# e is the base 2 exponent of x (signficand set to zero)
+	e = (ui & sign_mask(Float64)) | max(min_exp,ui & exponent_mask(Float64))
+	# e = (ui & sign_mask(Float64)) | (ui & exponent_mask(Float64))
+	e = reinterpret(Float64,e)
 
 	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float64)
