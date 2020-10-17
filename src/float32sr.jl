@@ -58,7 +58,7 @@ const eps64_quarter = 0x0000_0000_4000_0000		# a quarter of eps as Float64 sig b
 const F64_one = reinterpret(UInt64,one(Float64))
 
 # The smallest non-subnormal exponent of Float32 as Float64 reinterpreted as UInt64
-const min_exp = reinterpret(UInt64,Float64(floatmin(Float32)))
+const min_expF32 = reinterpret(UInt64,Float64(floatmin(Float32)))
 
 """Convert to Float32sr from Float64 with stochastic rounding."""
 function Float32_stochastic_round(x::Float64)
@@ -68,7 +68,7 @@ function Float32_stochastic_round(x::Float64)
 	# stochastic rounding
 	# e is the base 2 exponent of x (signficand set to zero)
 	# e is at least min_exp for stochastic rounding for subnormals
-	e = (ui & sign_mask(Float64)) | max(min_exp,ui & exponent_mask(Float64))
+	e = (ui & sign_mask(Float64)) | max(min_expF32,ui & exponent_mask(Float64))
 	e = reinterpret(Float64,e)
 
 	# sig is the signficand (exponents & sign is masked out)

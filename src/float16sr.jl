@@ -95,17 +95,22 @@ end
 const epsF16 = Float32(eps(Float16))		# machine epsilon of Float16 as Float32
 const epsF16_half = epsF16/2				# machine epsilon half
 
+# The smallest non-subnormal exponent of Float16 as Float32 reinterpreted as UInt32
+const min_expF16 = reinterpret(UInt32,Float32(floatmin(Float16)))
+
 """Convert to BFloat16sr from Float32 with stochastic rounding."""
 function Float16_stochastic_round(x::Float32)
 	isnan(x) && return NaN16sr
 
 	ui = reinterpret(UInt32, x)
 
-	# e is the base 2 exponent of x (with sign, signficand is set to zero)
+	# e is the base 2 exponent of x (with signficand is set to zero)
 	# e.g. e is 2 for pi, e is -2 for -pi, e is 0.25 for 0.3
-	e = reinterpret(Float32,ui & signexp_mask(Float32))
+    # e is at least min_exp for stsochastic rounding for subnormals
+    e = (ui & sign_mask(Float32)) | max(min_expF16,ui & exponent_mask(Float32))
+    e = reinterpret(Float32,e)
 
-		# sig is the signficand (exponents & sign is masked out)
+	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float32)
 
 	# STOCHASTIC ROUNDING
