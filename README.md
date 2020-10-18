@@ -57,6 +57,6 @@ And similarly for the other number types. Then on an Intel(R) Core(R) i5 (Ice La
 | rounding mode         | Float32    | BFloat16   | Float16   |
 | --------------------- | ---------- | ---------- | --------- |
 | default               | 424.639 μs | 557.777 μs | 16.446 ms | 
-| + stochastic rounding | 3.622 ms   | 4.985 ms   | 21.350 ms |
+| + stochastic rounding | 4.567 ms   | 5.120 ms   | 22.161 ms |
 
-Stochastic rounding adds about 3-5ms and imposes a x8 performance decrease for Float32, x9 performance decrease for BFloat16 and x1.3 for Float16.
+Stochastic rounding adds about 4-6ms and imposes an about x10 performance decrease for Float32/BFloat16, and x1.3 for Float16.
