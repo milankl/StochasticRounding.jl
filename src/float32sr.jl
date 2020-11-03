@@ -71,7 +71,7 @@ function Float32_stochastic_round(x::Float64)
 	# Then deterministic round to nearest to either round up or round down.
 	r = rand(Xor128[],Int64) >> 35   # = 32sbits+3expbits difference between f32,f64
 	ui = reinterpret(Int64,x) + r
-	return Float32(reinterpret(Float64,ui))
+	return Float32sr(reinterpret(Float64,ui))
 end
 
 # """Convert to Float32sr from Float64 with stochastic rounding."""

@@ -69,7 +69,7 @@ function BFloat16sr(x::Float32)
     return reinterpret(BFloat16sr, (h >> 16) % UInt16)
 end
 
-"""Convert to Float32sr from Float64 with stochastic rounding.
+"""Convert to BFloat16sr from Float32 with stochastic rounding.
 Binary arithmetic version."""
 function BFloat16_stochastic_round(x::Float32)
 	# r are random bits for the last 15
@@ -80,7 +80,7 @@ function BFloat16_stochastic_round(x::Float32)
 	# Then deterministic round to nearest to either round up or round down.
 	r = rand(Xor128[],Int32) >> 16
 	ui = reinterpret(Int32,x) + r
-	return BFloat16(reinterpret(Float32,ui))
+	return BFloat16sr(reinterpret(Float32,ui))
 end
 
 # """Convert to BFloat16sr from Float32 with stochastic rounding."""
