@@ -49,48 +49,6 @@ Float64(x::Float16sr) = Float64(Float16(x))
 Float16sr(x::Integer) = Float16sr(Float32(x))
 (::Type{T})(x::Float16sr) where {T<:Integer} = T(Float32(x))
 
-# THE FOLLOWING IS COPIED FROM JULIA BASE:
-# Float32 -> Float16 algorithm from:
-#   "Fast Half Float Conversion" by Jeroen van der Zijp
-#   ftp://ftp.fox-toolkit.org/pub/fasthalffloatconversion.pdf
-#
-# With adjustments for round-to-nearest, ties to even.
-#
-let _basetable = Vector{UInt16}(undef, 512),
-    _shifttable = Vector{UInt8}(undef, 512)
-    for i = 0:255
-        e = i - 127
-        if e < -25  # Very small numbers map to zero
-            _basetable[i|0x000+1] = 0x0000
-            _basetable[i|0x100+1] = 0x8000
-            _shifttable[i|0x000+1] = 25
-            _shifttable[i|0x100+1] = 25
-        elseif e < -14  # Small numbers map to denorms
-            _basetable[i|0x000+1] = 0x0000
-            _basetable[i|0x100+1] = 0x8000
-            _shifttable[i|0x000+1] = -e-1
-            _shifttable[i|0x100+1] = -e-1
-        elseif e <= 15  # Normal numbers just lose precision
-            _basetable[i|0x000+1] = ((e+15)<<10)
-            _basetable[i|0x100+1] = ((e+15)<<10) | 0x8000
-            _shifttable[i|0x000+1] = 13
-            _shifttable[i|0x100+1] = 13
-        elseif e < 128  # Large numbers map to Infinity
-            _basetable[i|0x000+1] = 0x7C00
-            _basetable[i|0x100+1] = 0xFC00
-            _shifttable[i|0x000+1] = 24
-            _shifttable[i|0x100+1] = 24
-        else  # Infinity and NaN's stay Infinity and NaN's
-            _basetable[i|0x000+1] = 0x7C00
-            _basetable[i|0x100+1] = 0xFC00
-            _shifttable[i|0x000+1] = 13
-            _shifttable[i|0x100+1] = 13
-        end
-    end
-    global const shifttable = (_shifttable...,)
-    global const basetable = (_basetable...,)
-end
-
 # constants needed for stochastic perturbation
 const epsF16 = Float32(eps(Float16))		# machine epsilon of Float16 as Float32
 const epsF16_half = epsF16/2				# machine epsilon half
