@@ -111,6 +111,11 @@ function Float32_chance_roundup(x::Float64)
 	# sig is the signficand (exponents & sign is masked out)
 	sig = ui & significand_mask(Float64)
 	frac = reinterpret(Float64,F64_one | (sig << 23)) - 1.0
+	# sig << 23, push significant bits that would be round away into the most
+	# most significant bits, then set the exponent to be equi to one(Float64)
+	# as there are more significant bits than exponent bits make sure that
+	# the sign and the first exponent bit is zero by applying the 0x3fff mask
+	frac = reinterpret(Float64,0x3fff_ffff_ffff_ffff & (F64_one | (sig << 23))) - 1.0
 	return frac
 end
 

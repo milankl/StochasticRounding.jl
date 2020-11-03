@@ -115,7 +115,7 @@ function Float16_chance_roundup(x::Float32)
 	# for one quarter the way, frac=1/4 etc.
 	# this equals the chance that x gets round up in stochastic rounding
 	# note that frac is in [0,1).
-	frac = reinterpret(Float32,F32_one | (sig << 10)) - 1f0
+	frac = reinterpret(Float32,0x3fff_ffff & (F32_one | (sig << 10))) - 1f0
 	return frac
 end
 
