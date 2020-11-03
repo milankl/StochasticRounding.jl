@@ -54,9 +54,12 @@ julia> B1,B2 = Float32sr.(A1),Float32sr.(A2);
 ```
 And similarly for the other number types. Then on an Intel(R) Core(R) i5 (Ice Lake) @ 1.1GHz timings via `@btime +($A1,$A2)` etc. are
 
-| rounding mode         | Float32    | BFloat16   | Float16   |
-| --------------------- | ---------- | ---------- | --------- |
-| default               | 424.639 μs | 557.777 μs | 16.446 ms | 
-| + stochastic rounding | 4.567 ms   | 5.120 ms   | 22.161 ms |
+| rounding mode         | Float32    | BFloat16   | Float64   | Float16   |
+| --------------------- | ---------- | ---------- | --------- | --------- |
+| default               | 460.421 μs | 588.813 μs | 1.151ms   | 16.446 ms |
+| + stochastic rounding | 2.458 ms   | 3.398 ms   | n/a       | 17.318 ms |
 
-Stochastic rounding adds about 4-6ms and imposes an about x10 performance decrease for Float32/BFloat16, and x1.3 for Float16.
+Stochastic rounding imposes an about x5 performance decrease for Float32/BFloat16, but is negligible for Float16. For Float32sr about 50% of the time is
+spend on the random number generation, a bit less than 50% on the addition in
+Float64 and the rest is the addition of the random number on the result and
+round to nearest.
