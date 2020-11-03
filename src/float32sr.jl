@@ -63,6 +63,7 @@ const min_expF32 = reinterpret(UInt64,Float64(floatmin(Float32)))
 """Convert to Float32sr from Float64 with stochastic rounding.
 Binary arithmetic version."""
 function Float32_stochastic_round(x::Float64)
+	iszero(x) && return zero(Float32sr)
 	# r are random bits for the last 31
 	# >> either introduces 0s for the first 33 bits
 	# or 1s. Interpreted as Int64 this corresponds to [-ulp/2,ulp/2)

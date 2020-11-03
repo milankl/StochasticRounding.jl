@@ -72,6 +72,7 @@ end
 """Convert to BFloat16sr from Float32 with stochastic rounding.
 Binary arithmetic version."""
 function BFloat16_stochastic_round(x::Float32)
+	iszero(x) && return zero(BFloat16sr)
 	# r are random bits for the last 15
 	# >> either introduces 0s for the first 17 bits
 	# or 1s. Interpreted as Int64 this corresponds to [-ulp/2,ulp/2)
