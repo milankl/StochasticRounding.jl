@@ -56,6 +56,20 @@ const epsF16_half = epsF16/2				# machine epsilon half
 # The smallest non-subnormal exponent of Float16 as Float32 reinterpreted as UInt32
 const min_expF16 = reinterpret(UInt32,Float32(floatmin(Float16)))
 
+"""Convert to Float16sr from Float32 with stochastic rounding.
+Binary arithmetic version."""
+function Float16_stochastic_round(x::Float32)
+	# r are random bits for the last 15
+	# >> either introduces 0s for the first 17 bits
+	# or 1s. Interpreted as Int64 this corresponds to [-ulp/2,ulp/2)
+	# which is added with binary arithmetic subsequently
+	# this is the stochastic perturbation.
+	# Then deterministic round to nearest to either round up or round down.
+	r = rand(Xor128[],Int32) >> 19 # = 16sbits+3expbits difference between f16,f32
+	ui = reinterpret(Int32,x) + r
+	return Float16(reinterpret(Float32,ui))
+end
+
 """Convert to BFloat16sr from Float32 with stochastic rounding."""
 function Float16_stochastic_round(x::Float32)
 	isnan(x) && return NaN16sr
