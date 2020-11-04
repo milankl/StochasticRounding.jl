@@ -52,18 +52,13 @@ Float64(x::Float32sr) = Float64(Float32(x))
 Float32sr(x::Integer) = Float32sr(Float32(x))
 (::Type{T})(x::Float32sr) where {T<:Integer} = T(Float32(x))
 
-const epsF32 = Float64(eps(Float32))
-const epsF32_half = epsF32/2
-const eps64_quarter = 0x0000_0000_4000_0000		# a quarter of eps as Float64 sig bits
-const F64_one = reinterpret(UInt64,one(Float64))
-
-# The smallest non-subnormal exponent of Float32 as Float64 reinterpreted as UInt64
-const min_expF32 = reinterpret(UInt64,Float64(floatmin(Float32)))
-
 """Convert to Float32sr from Float64 with stochastic rounding.
 Binary arithmetic version."""
 function Float32_stochastic_round(x::Float64)
-	iszero(x) && return zero(Float32sr)
+	# check whether round to nearest maps to zero(Float32)
+	# to avoid stochastic rounding to NaN
+	iszero(Float32(x)) && return zero(Float32sr)
+
 	# r are random bits for the last 31
 	# >> either introduces 0s for the first 33 bits
 	# or 1s. Interpreted as Int64 this corresponds to [-ulp/2,ulp/2)
@@ -71,53 +66,11 @@ function Float32_stochastic_round(x::Float64)
 	# this is the stochastic perturbation.
 	# Then deterministic round to nearest to either round up or round down.
 	r = rand(Xor128[],Int64) >> 35   # = 32sbits+3expbits difference between f32,f64
-	ui = reinterpret(Int64,x) + r
-	return Float32sr(reinterpret(Float64,ui))
+	xr = reinterpret(Float64,reinterpret(Int64,x) + r)
+	return Float32sr(xr)			# round to nearest
 end
 
-# """Convert to Float32sr from Float64 with stochastic rounding."""
-# function Float32_stochastic_round(x::Float64)
-#
-# 	ui = reinterpret(UInt64, x)
-#
-# 	# stochastic rounding
-# 	# e is the base 2 exponent of x (signficand set to zero)
-# 	# e is at least min_exp for stochastic rounding for subnormals
-# 	e = (ui & sign_mask(Float64)) | max(min_expF32,ui & exponent_mask(Float64))
-# 	e = reinterpret(Float64,e)
-#
-# 	# sig is the signficand (exponents & sign is masked out)
-# 	sig = ui & significand_mask(Float64)
-#
-# 	# STOCHASTIC ROUNDING
-# 	# In most cases, perturb any x between x0 and x1 with a random number
-# 	# that is in (-ulp/2,ulp/2) where ulp is the distance between x0 and x1.
-# 	# ulp = e*eps, with e the next base 2 exponent to zero from x.
-#
-# 	# However, there is a special case (aka the "quarter-case") for rounding
-# 	# below ulp/4 when x0 is 2^n for any n (i.e. above an exponent bit flip)
-# 	# due to doubling of ulp towards x1.
-# 	quartercase = sig < eps64_quarter	# true for special case false otherwise
-#
-# 	# frac is in most cases 0.5 to shift the randum number [0,1) to [-0.5,0.5)
-# 	# However, in the special case frac is (x-x0)/(x1-x0), that means the fraction
-# 	# of the distance where x is in between x0 and x1
-# 	# Then shift the random number [0,1) to be [-frac/2,-frac/2+ulp/2)
-# 	# such that e.g. x = x0 + ulp/8 gets perturbed to be in [x0+ulp/16,x0+ulp/16+ulp/2)
-# 	# and so the chance of a round-up is indeed 1/8
-# 	# Illustration, let x be at 1/8, then perturb such that x can be in (--)
-# 	# 1 -- x --1/4--   --1/2--   --   --   -- 2
-# 	# 1  (-x-----------------)                2
-# 	# i.e. starting from 1/16 up to 1/2+1/16
-# 	frac = quartercase ? reinterpret(Float64,F64_one | (sig << 23)) - 1.0 : 0.5
-# 	eps = quartercase ? epsF32_half : epsF32
-#
-# 	# stochastically perturb x before rounding (equiv to stochastic rounding)
-# 	x += e*eps*(rand(Xor128[],Float64) - frac)
-#
-#     # Round to nearest after stochastic perturbation
-#     return Float32sr(x)
-# end
+const F64_one = reinterpret(UInt64,one(Float64))
 
 """Chance that x::Float64 is round up when converted to Float32sr."""
 function Float32_chance_roundup(x::Float64)

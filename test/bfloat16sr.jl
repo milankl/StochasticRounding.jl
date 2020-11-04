@@ -16,12 +16,11 @@ end
 end
 
 @testset "No stochastic round to NaN" begin
-    N = 100
     f1 = nextfloat(0f0)
     f2 = prevfloat(0f0)
-    for i in 1:N
-        @test isfinite(StochasticRounding.BFloat16_stochastic_round(f1))
-        @test isfinite(StochasticRounding.BFloat16_stochastic_round(f2))
+    for i in 1:100
+        @test isfinite(BFloat16_stochastic_round(f1))
+        @test isfinite(BFloat16_stochastic_round(f2))
     end
 end
 

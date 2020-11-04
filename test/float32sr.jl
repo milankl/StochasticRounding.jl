@@ -280,8 +280,17 @@ end
 @testset "No stochastic round to NaN" begin
     f1 = nextfloat(0.0)
     f2 = prevfloat(0.0)
-    for i in 1:N
-        @test isfinite(StochasticRounding.Float32_stochastic_round(f1))
-        @test isfinite(StochasticRounding.Float32_stochastic_round(f2))
+    for i in 1:1000
+        @test isfinite(Float32_stochastic_round(f1))
+        @test isfinite(Float32_stochastic_round(f2))
+    end
+end
+
+@testset "No stochastic round to NaN" begin
+    f1 = Float64(floatmax(Float32))   # larger can map to Inf though!
+    f2 = -f1
+    for i in 1:1000
+        @test isfinite(Float32_stochastic_round(f1))
+        @test isfinite(Float32_stochastic_round(f2))
     end
 end
