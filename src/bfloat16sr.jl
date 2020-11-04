@@ -75,7 +75,7 @@ function BFloat16_stochastic_round(x::Float32)
 	iszero(x) && return zero(BFloat16sr)
 	# r are random bits for the last 15
 	# >> either introduces 0s for the first 17 bits
-	# or 1s. Interpreted as Int64 this corresponds to [-ulp/2,ulp/2)
+	# or 1s. Interpreted as Int32 this corresponds to [-ulp/2,ulp/2)
 	# which is added with binary arithmetic subsequently
 	# this is the stochastic perturbation.
 	# Then deterministic round to nearest to either round up or round down.

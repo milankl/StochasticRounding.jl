@@ -32,9 +32,9 @@ const Inf32sr = reinterpret(Float32sr, Inf32)
 const NaN32sr = reinterpret(Float32sr, NaN32)
 
 # basic operations
-abs(x::Float32sr) = reinterpret(Float32sr, reinterpret(UInt32, x) & 0x7fff_ffff)
-isnan(x::Float32sr) = reinterpret(UInt32,x) & 0x7fff_ffff > 0x7f80_0000
-isfinite(x::Float32sr) = reinterpret(UInt32,x) & 0x7fff_ffff != 0x7f80_0000
+abs(x::Float32sr) = reinterpret(Float32sr, abs(reinterpret(Float32)))
+isnan(x::Float32sr) = isnan(reinterpret(Float32,x))
+isfinite(x::Float32sr) = isfinite(reinterpret(Float32,x))
 
 nextfloat(x::Float32sr) = Float32sr(nextfloat(Float32(x)))
 prevfloat(x::Float32sr) = Float32sr(prevfloat(Float32(x)))

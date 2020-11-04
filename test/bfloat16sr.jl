@@ -9,6 +9,21 @@ end
     @test 0f == BFloat16sr(0)
 end
 
+@testset "NaN and Inf" begin
+    @test isnan(NaNB16sr)
+    @test ~isfinite(NaNB16sr)
+    @test ~isfinite(InfB16sr)
+end
+
+@testset "No stochastic round to NaN" begin
+    f1 = nextfloat(0f0)
+    f2 = prevfloat(0f0)
+    for i in 1:N
+        @test isfinite(StochasticRounding.BFloat16_stochastic_round(f1))
+        @test isfinite(StochasticRounding.BFloat16_stochastic_round(f2))
+    end
+end
+
 @testset "Rounding" begin
     @test 1 == Int(round(BFloat16sr(1.2)))
     @test 1 == Int(floor(BFloat16sr(1.2)))

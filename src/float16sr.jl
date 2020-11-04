@@ -30,8 +30,8 @@ const NaN16sr = reinterpret(Float16sr, NaN16)
 
 # basic operations
 abs(x::Float16sr) = reinterpret(Float16sr, reinterpret(UInt16, x) & 0x7fff)
-isnan(x::Float16sr) = reinterpret(UInt16,x) & 0x7fff > 0x7c00
-isfinite(x::Float16sr) = reinterpret(UInt16,x) & 0x7c00 != 0x7c00
+isnan(x::Float16sr) = isnan(Float16(x))
+isfinite(x::Float16sr) = isfinite(Float16(x))
 
 nextfloat(x::Float16sr) = Float16sr(nextfloat(Float16(x)))
 prevfloat(x::Float16sr) = Float16sr(prevfloat(Float16(x)))

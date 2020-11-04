@@ -22,7 +22,7 @@ module StochasticRounding
 
     # faster random number generator
     using RandomNumbers.Xorshifts
-    const Xor128 = Ref{Xoroshiro128Plus}()
+    const Xor128 = Ref{Xoroshiro128Plus}(Xoroshiro128Plus())
 
     """Reseed the PRNG randomly by recalling."""
     function __init__()
