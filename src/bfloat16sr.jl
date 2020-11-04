@@ -68,6 +68,8 @@ function BFloat16_stochastic_round(x::Float32)
 	ix = reinterpret(Int32,x)
 	# if deterministically round to 0 return 0
 	# to avoid a stochastic rounding to NaN
+	# push to the left to get rid of sign
+	# push to the right to get rid of the insignificant bits
 	((ix << 1) >> 16) == 0x0000_0000 && return zero(BFloat16sr)
 	# r are random bits for the last 15
 	# >> either introduces 0s for the first 17 bits
