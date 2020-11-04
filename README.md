@@ -56,10 +56,9 @@ And similarly for the other number types. Then on an Intel(R) Core(R) i5 (Ice La
 
 | rounding mode         | Float32    | BFloat16   | Float64   | Float16   |
 | --------------------- | ---------- | ---------- | --------- | --------- |
-| default               | 460.421 μs | 588.813 μs | 1.151ms   | 16.446 ms |
-| + stochastic rounding | 2.458 ms   | 3.398 ms   | n/a       | 17.318 ms |
+| default               | 460 μs     | 556 μs     | 1.151ms   | 16.446 ms |
+| + stochastic rounding | 2.585 ms   | 3.820 ms   | n/a       | 20.714 ms |
 
-Stochastic rounding imposes an about x5 performance decrease for Float32/BFloat16, but is negligible for Float16. For Float32sr about 50% of the time is
-spend on the random number generation, a bit less than 50% on the addition in
-Float64 and the rest is the addition of the random number on the result and
-round to nearest.
+Stochastic rounding imposes an about x5-7 performance decrease for Float32/BFloat16, but is almost negligible for Float16. 
+For Float32sr about 50% of the time is spend on the random number generation, a bit less than 50% on the addition in
+Float64 and the rest is the addition of the random number on the result and round to nearest.
