@@ -3,6 +3,21 @@
     @test zero(Float16sr) == -(zero(Float16sr))
 end
 
+@testset "NaN and Inf" begin
+    @test isnan(NaN16sr)
+    @test ~isfinite(NaN16sr)
+    @test ~isfinite(Inf16sr)
+end
+
+@testset "No stochastic round to NaN" begin
+    f1 = nextfloat(0f0)
+    f2 = prevfloat(0f0)
+    for i in 1:100
+        @test isfinite(Float16_stochastic_round(f1))
+        @test isfinite(Float16_stochastic_round(f2))
+    end
+end
+
 @testset "Integer promotion" begin
     f = Float16sr(1)
     @test 2f == Float16sr(2)
@@ -270,8 +285,6 @@ end
 
     # for some reason 0x0200 fails...?
     for hex in vcat(0x0001:0x01ff,0x0201:0x03ff)    # test for all subnormals of Float16
-
-        println(hex)
 
         # add ulp/2 to have stochastic rounding that is 50/50 up/down.
         x = Float32(reinterpret(Float16,hex)) + ulp_half

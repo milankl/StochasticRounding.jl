@@ -51,14 +51,7 @@ UInt32(x::BFloat16sr) = UInt32(Float32(x))
 UInt16(x::BFloat16sr) = UInt16(Float32(x))
 UInt8(x::BFloat16sr) = UInt8(Float32(x))
 
-const epsBF16 = 0.0078125f0							# machine epsilon of BFloat16 as Float32
-const epsBF16_half = epsBF16/2						# half the machine epsilon
-const eps_quarter = 0x0000_4000						# a quarter of eps as Float32 sig bits
 const F32_one = reinterpret(UInt32,one(Float32))	# Float32 one as UInt32
-
-# The smallest non-subnormal exponent of BFloat16 as Float32 reinterpreted as UInt32
-# floatmin(Float32) = floatmin(BFloat16)
-const min_expBF16 = reinterpret(UInt32,floatmin(Float32))
 
 """Convert to BFloat16sr from Float32 via round-to-nearest
 and tie to even. Identical to BFloat16(::Float32)."""
@@ -72,63 +65,22 @@ end
 """Convert to BFloat16sr from Float32 with stochastic rounding.
 Binary arithmetic version."""
 function BFloat16_stochastic_round(x::Float32)
-	iszero(x) && return zero(BFloat16sr)
+	ix = reinterpret(Int32,x)
+	# if deterministically round to 0 return 0
+	# to avoid a stochastic rounding to NaN
+	# push to the left to get rid of sign
+	# push to the right to get rid of the insignificant bits
+	((ix << 1) >> 16) == 0x0000_0000 && return zero(BFloat16sr)
 	# r are random bits for the last 15
 	# >> either introduces 0s for the first 17 bits
-	# or 1s. Interpreted as Int64 this corresponds to [-ulp/2,ulp/2)
+	# or 1s. Interpreted as Int32 this corresponds to [-ulp/2,ulp/2)
 	# which is added with binary arithmetic subsequently
 	# this is the stochastic perturbation.
 	# Then deterministic round to nearest to either round up or round down.
 	r = rand(Xor128[],Int32) >> 16
-	ui = reinterpret(Int32,x) + r
-	return BFloat16sr(reinterpret(Float32,ui))
+	xr = reinterpret(Float32,ix + r)
+	return BFloat16sr(xr)
 end
-
-# """Convert to BFloat16sr from Float32 with stochastic rounding."""
-# function BFloat16_stochastic_round(x::Float32)
-#     isnan(x) && return NaNB16sr
-#
-# 	ui = reinterpret(UInt32, x)
-#
-# 	# e is the base 2 exponent of x (with signficand is set to zero)
-# 	# e.g. e is 2 for pi, e is -2 for -pi, e is 0.25 for 0.3
-# 	# e is at least min_exp for stochastic rounding for subnormals
-# 	e = (ui & sign_mask(Float32)) | max(min_expBF16,ui & exponent_mask(Float32))
-# 	e = reinterpret(Float32,e)
-#
-# 	# sig is the signficand (exponents & sign is masked out)
-# 	sig = ui & significand_mask(Float32)
-#
-# 	# STOCHASTIC ROUNDING
-# 	# In most cases, perturb any x between x0 and x1 with a random number
-# 	# that is in (-ulp/2,ulp/2) where ulp is the distance between x0 and x1.
-# 	# ulp = e*eps, with e the next base 2 exponent to zero from x.
-#
-# 	# However, there is a special case (aka the "quarter-case") for rounding
-# 	# below ulp/4 when x0 is 2^n for any n (i.e. above an exponent bit flip)
-# 	# due to doubling of ulp towards x1.
-# 	quartercase = sig < eps_quarter		# true for special case false otherwise
-#
-# 	# frac is in most cases 0.5 to shift the randum number [0,1) to [-0.5,0.5)
-#
-# 	# However, in the special case frac is (x-x0)/(x1-x0), that means the fraction
-# 	# of the distance where x is in between x0 and x1
-# 	# Then shift the random number [0,1) to be [-frac/2,-frac/2+ulp/2)
-# 	# such that e.g. x = x0 + ulp/8 gets perturbed to be in [x0+ulp/16,x0+ulp/16+ulp/2)
-# 	# and so the chance of a round-up is indeed 1/8
-# 	# Illustration, let x be at 1/8, then perturb such that x can be in (--)
-# 	# 1 -- x --1/4--   --1/2--   --   --   -- 2
-# 	# 1  (-x-----------------)                2
-# 	# i.e. starting from 1/16 up to 1/2+1/16
-# 	frac = quartercase ? reinterpret(Float32,F32_one | (sig << 7)) - 1f0 : 0.5f0
-# 	eps = quartercase ? epsBF16_half : epsBF16	# in this case use eps/2
-#
-# 	# stochastically perturb x before rounding (equiv to stochastic rounding)
-# 	x += e*eps*(rand(Xor128[],Float32) - frac)
-#
-#     # Round to nearest after stochastic perturbation
-#     return BFloat16sr(x)
-# end
 
 """Chance that x::Float32 is round up when converted to BFloat16sr."""
 function BFloat16_chance_roundup(x::Float32)
