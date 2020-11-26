@@ -4,9 +4,15 @@
 
 Stochastic rounding for floating-point arithmetic.
 
-This package exports `Float32sr`,`Float16sr` and `BFloat16sr`. Three number formats that behave like their deterministic counterparts but with stochastic rounding that is proportional to the distance of the next representable numbers and therefore [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding) (see also example below in "Usage"). Although there is currently no known hardware implementation available, [Graphcore is working on IPUs with stochastic rounding](https://www.graphcore.ai/posts/directions-of-ai-research). Stochastic rounding makes the number formats considerably slower, but e.g. Float32+stochastic rounding is only about 2x slower than Float64. [Xoroshio128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package.
-
-Stochastic rounding is only applied on arithmetic operations, and not on type conversions (standard round to nearest instead).
+This package exports `Float32sr`,`Float16sr` and `BFloat16sr`. Three number formats that behave like their deterministic counterparts but
+with stochastic rounding that is proportional to the distance of the next representable numbers and therefore
+[exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding) (see also example below in "Usage"). 
+Although there is currently no known hardware implementation available, 
+[Graphcore is working on IPUs with stochastic rounding](https://www.graphcore.ai/posts/directions-of-ai-research). 
+Stochastic rounding makes the number formats considerably slower, but e.g. Float32+stochastic rounding is only 
+about 2x slower than Float64. [Xoroshio128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), 
+a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the 
+[RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package, due to its speed and statistical properties.
 
 You are welcome to raise [issues](https://github.com/milankl/StochasticRounding.jl/issues), ask questions or suggest any changes or new features.
 
