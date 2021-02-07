@@ -2,9 +2,12 @@
 
 # StochasticRounding
 
-This package exports `Float32sr`,`Float16sr` and `BFloat16sr`. Three number formats that behave like their deterministic counterparts but with stochastic rounding that is proportional to the distance of the next representable numbers and therefore [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding) (see also example below in "Usage"). Although there is currently no known hardware implementation available, [Graphcore is working on IPUs with stochastic rounding](https://www.graphcore.ai/posts/directions-of-ai-research). Stochastic rounding makes the number formats considerably slower, but e.g. Float32+stochastic rounding is only about 2x slower than Float64. [Xoroshio128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package.
+This package exports `Float32sr`,`Float16sr`,`FastFloat16sr` and `BFloat16sr`. Three number formats that behave like their deterministic counterparts but with stochastic rounding that is proportional to the distance of the next representable numbers and therefore [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding) (see also example below in "Usage"). Although there is currently no known hardware implementation available, [Graphcore is working on IPUs with stochastic rounding](https://www.graphcore.ai/posts/directions-of-ai-research). Stochastic rounding makes the number formats considerably slower, but e.g. Float32+stochastic rounding is only about 2x slower than Float64. [Xoroshio128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package.
 
 Stochastic rounding is only applied on arithmetic operations, and not on type conversions (standard round to nearest instead).
+
+`BFloat16sr` is based on [BFloat16s.jl](https://github.com/JuliaMath/BFloat16s.jl)   
+`FastFloat16sr` is based on [FastFloat16s.jl](https://github.com/milankl/FastFloat16s.jl)
 
 ### Usage
 
@@ -54,10 +57,10 @@ julia> B1,B2 = Float32sr.(A1),Float32sr.(A2);
 ```
 And similarly for the other number types. Then on an Intel(R) Core(R) i5 (Ice Lake) @ 1.1GHz timings via `@btime +($A1,$A2)` etc. are
 
-| rounding mode         | Float32    | BFloat16   | Float64   | Float16   |
-| --------------------- | ---------- | ---------- | --------- | --------- |
-| default               | 460 μs     | 556 μs     | 1.151ms   | 16.446 ms |
-| + stochastic rounding | 2.585 ms   | 3.820 ms   | n/a       | 20.714 ms |
+| rounding mode         | Float32    | BFloat16   | Float64   | [FastFloat16](https://github.com/milankl/FastFloat16s.jl) | Float16   |
+| --------------------- | ---------- | ---------- | --------- | ----------- | --------- |
+| default               | 460 μs     | 556 μs     | 1.151ms   | 629 μs      | 16.446 ms |
+| + stochastic rounding | 2.585 ms   | 3.820 ms   | n/a       | 4.096 ms    | 20.714 ms |
 
 Stochastic rounding imposes an about x5-7 performance decrease for Float32/BFloat16, but is almost negligible for Float16. 
 For Float32sr about 50% of the time is spend on the random number generation, a bit less than 50% on the addition in

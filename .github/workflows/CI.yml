@@ -1,0 +1,28 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        julia-version: ["1.0", "1.5", nightly]
+        julia-arch: [x64]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Set up Julia"
+        uses: julia-actions/setup-julia@latest
+        with:
+          version: ${{ matrix.julia-version }}
+          arch: ${{ matrix.julia-arch }}
+      - uses: julia-actions/julia-runtest@latest
+      - uses: julia-actions/julia-uploadcodecov@latest
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
