@@ -5,7 +5,9 @@ module StochasticRounding
         Float16sr,Float16_stochastic_round,
         Float16_chance_roundup,NaN16sr,Inf16sr,
         Float32sr,Float32_stochastic_round,
-        Float32_chance_roundup,NaN32sr,Inf32sr
+        Float32_chance_roundup,NaN32sr,Inf32sr,
+        FastFloat16sr,FastFloat16_stochastic_round,
+        FastFloat16_chance_roundup,NaNF16sr,InfF16sr
 
 	import Base: isfinite, isnan, precision, iszero,
         sign_mask, exponent_mask, significand_mask,
@@ -40,5 +42,6 @@ module StochasticRounding
     include("bfloat16sr.jl")
     include("float16sr.jl")
     include("float32sr.jl")
+    include("fast_float16sr.jl")
 
 end

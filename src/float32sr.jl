@@ -32,7 +32,7 @@ const Inf32sr = reinterpret(Float32sr, Inf32)
 const NaN32sr = reinterpret(Float32sr, NaN32)
 
 # basic operations
-abs(x::Float32sr) = reinterpret(Float32sr, abs(reinterpret(Float32)))
+abs(x::Float32sr) = reinterpret(Float32sr, abs(reinterpret(Float32,x)))
 isnan(x::Float32sr) = isnan(reinterpret(Float32,x))
 isfinite(x::Float32sr) = isfinite(reinterpret(Float32,x))
 
