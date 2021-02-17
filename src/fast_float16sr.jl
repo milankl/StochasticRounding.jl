@@ -55,13 +55,14 @@ FastFloat16sr(x::Integer) = FastFloat16sr(Float32(x))
 (::Type{T})(x::FastFloat16sr) where {T<:Integer} = T(Float32(x))
 
 const minpos_f16_asInt32 = reinterpret(Int32,Float32(nextfloat(zero(Float16))))
-const ssmask = reinterpret(UInt32,0x7f80_0000)
+const ssmask = reinterpret(Int32,0x7f80_0000)           # sign and signifcand mask
 
-"""Convert to FastFloat16sr from Float32 with stochastic rounding.
-Binary arithmetic version."""
+"""Convert to FastFloat16sr from Float32 with stochastic rounding."""
 function FastFloat16_stochastic_round(x::Float32)
     xi = reinterpret(Int32,x)
+    # if round to nearest to 0 return 0
 	(xi & ssmask) < minpos_f16_asInt32 && return zero(FastFloat16sr)
+    # random perturbation in integer arithmetic
 	xr = reinterpret(Float32,xi + rand(Xor128[],Int32) >> 19)
 	return FastFloat16sr(xr)
 end
