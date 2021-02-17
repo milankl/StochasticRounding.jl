@@ -54,14 +54,15 @@ Base.Float64(x::FastFloat16sr) = Float64(Float32(x))
 FastFloat16sr(x::Integer) = FastFloat16sr(Float32(x))
 (::Type{T})(x::FastFloat16sr) where {T<:Integer} = T(Float32(x))
 
-const minpos_half_f16_asInt32 = reinterpret(Int32,Float32(nextfloat(zero(Float16)))/2)
+const minpos_f16_asInt32 = reinterpret(Int32,Float32(nextfloat(zero(Float16))))
+const ssmask = reinterpret(UInt32,0x7f80_0000)
 
 """Convert to FastFloat16sr from Float32 with stochastic rounding.
 Binary arithmetic version."""
 function FastFloat16_stochastic_round(x::Float32)
     xi = reinterpret(Int32,x)
-	s = ((xi & setsignzero - minpos_half_f16_asInt32) >> 31) + Int32(1)
-	xr = reinterpret(Float32,s*(xi + rand(Xor128[],Int32) >> 19))
+	(xi & ssmask) < minpos_f16_asInt32 && return zero(FastFloat16sr)
+	xr = reinterpret(Float32,xi + rand(Xor128[],Int32) >> 19)
 	return FastFloat16sr(xr)
 end
 
