@@ -51,6 +51,20 @@ Round-to-nearest (tie to even) is the standard rounding mode for IEEE floats. St
 The exact result x of an arithmetic operation (located at one fifth between x₂ and x₃ in this example) is always round down to x₂ for round-to-nearest.
 For stochastic rounding, only at 80% chance x is round down. At 20% chance it is round up to x₃, proportional to the distance of x between x₂ and x₃.
 
+### Subnormals
+
+The subnormals are treated differently as a compromise between speed and functionality
+- `Float32sr` uses a gradual transition* to round to nearest within the subnormals, |x|<minpos/2 is always round to 0,
+- `FastFloat16sr` also uses the gradual transition*.
+- `Float16sr` stochastically rounds all subnormals correctly,
+- `BFloat16sr` as well, but |x|<minpos/2 is always round to 0.
+
+Gradual transition means the following. Let `sn` be *the* subnormal, i.e. `floatmin`. Then
+- in [sn/2,sn) only x in [ulp/4,3ulp/4] is round stochastically, round to nearest else. (ulp is the distance between two representable numbers)
+- in [sn/4,sn/2) only x in [3ulp/8,5ulp/8] is round stochastically, round to nearest else.
+- in [sn/8,sn/4) only x in [7ulp/16,9ulp/16] is round stochastically, round to nearest else.
+- etc.
+
 ### Installation
 StochasticRounding.jl is registered in the Julia registry. Hence, simply do
 ```julia
@@ -60,7 +74,7 @@ where `]` opens the package manager.
 
 ### Performance
 
-StochasticRounding.jl is to my knowledge the fastest software implementation of stochastic rounding for floating-point arithmetic. Define a few random 1000x1000 matrices
+StochasticRounding.jl is to my knowledge among the fastest software implementation of stochastic rounding for floating-point arithmetic. Define a few random 1000x1000 matrices
 ```julia
 julia> using StochasticRounding, BenchmarkTools, BFloat16s
 julia> A1 = rand(Float32,1000,1000);
@@ -72,7 +86,7 @@ And similarly for the other number types. Then on an Intel(R) Core(R) i5 (Ice La
 | rounding mode         | Float32    | BFloat16   | Float64   | [FastFloat16](https://github.com/milankl/FastFloat16s.jl) | Float16   |
 | --------------------- | ---------- | ---------- | --------- | ----------- | --------- |
 | default               | 460 μs     | 556 μs     | 1.151ms   | 629 μs      | 16.446 ms |
-| + stochastic rounding | 2.585 ms   | 3.820 ms   | n/a       | 4.096 ms    | 20.714 ms |
+| + stochastic rounding | 2.585 ms   | 3.820 ms   | n/a       | 3.591 ms    | 18.611 ms |
 
 Stochastic rounding imposes an about x5-7 performance decrease for Float32/BFloat16, but is almost negligible for Float16. 
 For Float32sr about 50% of the time is spend on the random number generation, a bit less than 50% on the addition in
