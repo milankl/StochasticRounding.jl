@@ -13,6 +13,11 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
+[[FastFloat16s]]
+git-tree-sha1 = "b9dad104ba72e925a3aa2d632bd419494edcb216"
+uuid = "ecdfd59a-7c14-409c-ab7a-3704f8e92dd6"
+version = "0.1.0"
+
 [[InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
