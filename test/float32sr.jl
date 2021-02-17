@@ -294,3 +294,31 @@ end
         @test isfinite(Float32_stochastic_round(f2))
     end
 end
+
+# Due to the gradual transition to round to nearest in the subnormals, these
+# tests currently would fail
+@testset "Some other subnormals" begin
+    for scale in [2,4,8,16,32]
+        for frac in [4,8,16]
+            f64 = Float64(floatmin(Float32))/scale+eps(floatmin(Float32))/Float64(frac)
+            f32_rounddown = Float32sr(f64)
+            f32_roundup = nextfloat(f32_rounddown)
+
+            N = 100_000
+            p_down = 0
+            p_up = 0 
+            for _ in 1:N
+                f = Float32_stochastic_round(f64)
+                if f == f32_rounddown
+                    p_down += 1
+                elseif f == f32_roundup
+                    p_up += 1
+                end
+            end
+
+            @test_skip p_down + p_up == N
+            @test_skip isapprox(p_down/N,1-1/frac,rtol=5e-2)
+            @test_skip isapprox(p_up/N,1/frac,rtol=5e-2)
+        end
+    end
+end

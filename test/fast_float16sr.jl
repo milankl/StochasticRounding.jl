@@ -306,3 +306,27 @@ end
         @test p1/N < 0.55
     end
 end
+
+# FastFloat16sr currently has the gradual transition to round to nearest in the 
+# subnormals comprise - hence these tests would fail
+# @testset "Some other subnormals" begin
+#     f32 = Float32(1.068115234375e-05)
+#     f16_rounddown = FastFloat16sr(f32)
+#     f16_roundup = nextfloat(f16_rounddown)
+
+#     N = 100_000
+#     p_down = 0
+#     p_up = 0 
+#     for _ in 1:N
+#         f = FastFloat16_stochastic_round(f32)
+#         if f == f16_rounddown
+#             p_down += 1
+#         elseif f == f16_roundup
+#             p_up += 1
+#         end
+#     end
+
+#     @test p_down + p_up == N
+#     @test isapprox(p_down/N,0.8,atol=1e-2)
+#     @test isapprox(p_up/N,0.2,atol=1e-2)
+# end

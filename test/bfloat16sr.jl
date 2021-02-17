@@ -132,10 +132,6 @@ end
 end
 
 @testset "powers of 2 are not round" begin
-
-    p1 = 0
-    p2 = 0
-
     for x in Float32[2,4,8,16,32,64,128,256,512,1024]
         for i = 1:100
             @test x == Float32(BFloat16_stochastic_round(x))
@@ -143,7 +139,21 @@ end
         end
     end
 
+    for x in -Float32[2,4,8,16,32,64,128,256,512,1024]
+        for i = 1:100
+            @test x == Float32(BFloat16_stochastic_round(x))
+            @test x == Float32(BFloat16sr(x))
+        end
+    end
+
     for x in Float32[1/2,1/4,1/8,1/16,1/32,1/64,1/128,1/256,1/512,1/1024]
+        for i = 1:100
+            @test x == Float32(BFloat16_stochastic_round(x))
+            @test x == Float32(BFloat16sr(x))
+        end
+    end
+
+    for x in -Float32[1/2,1/4,1/8,1/16,1/32,1/64,1/128,1/256,1/512,1/1024]
         for i = 1:100
             @test x == Float32(BFloat16_stochastic_round(x))
             @test x == Float32(BFloat16sr(x))

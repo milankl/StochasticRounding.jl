@@ -306,3 +306,30 @@ end
         @test p1/N < 0.55
     end
 end
+
+@testset "Some other subnormals" begin
+    for scale in [2,4,8,16,32]
+        for frac in [4,8,16]
+            f32 = Float32(floatmin(Float16))/scale+eps(floatmin(Float16))/Float32(frac)
+            f16_rounddown = Float16sr(f32)
+            f16_roundup = nextfloat(f16_rounddown)
+
+            N = 100_000
+            p_down = 0
+            p_up = 0 
+            for _ in 1:N
+                f = Float16_stochastic_round(f32)
+                if f == f16_rounddown
+                    p_down += 1
+                elseif f == f16_roundup
+                    p_up += 1
+                end
+            end
+
+            @test p_down + p_up == N
+            @test isapprox(p_down/N,1-1/frac,rtol=5e-2)
+            @test isapprox(p_up/N,1/frac,rtol=5e-2)
+        end
+    end
+end
+
