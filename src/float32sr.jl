@@ -39,7 +39,7 @@ Base.isfinite(x::Float32sr) = isfinite(reinterpret(Float32,x))
 Base.nextfloat(x::Float32sr) = Float32sr(nextfloat(Float32(x)))
 Base.prevfloat(x::Float32sr) = Float32sr(prevfloat(Float32(x)))
 
-Base.:(-)(x::Float32sr) = reinterpret(Float32sr, reinterpret(UInt32, x) ⊻ sign_mask(Float32sr))
+Base.:(-)(x::Float32sr) = reinterpret(Float32sr, reinterpret(UInt32, x) ⊻ Base.sign_mask(Float32sr))
 
 # conversions
 Base.Float32(x::Float32sr) = reinterpret(Float32,x)
@@ -52,28 +52,23 @@ Base.Float64(x::Float32sr) = Float64(Float32(x))
 Float32sr(x::Integer) = Float32sr(Float32(x))
 (::Type{T})(x::Float32sr) where {T<:Integer} = T(Float32(x))
 
-const minpos_half = Float64(nextfloat(zero(Float32)))/2
-const minpos_half_asInt64 = reinterpret(Int64,minpos_half)
-const setsignzero_f64 = Int64(2^63-1)
-
 """Convert to Float32sr from Float64 with stochastic rounding.
 Gradual transition to round to nearest in the subnormals."""
 function Float32_stochastic_round(x::Float64)
     xi = reinterpret(Int64,x)
-    s = ((xi & setsignzero_f64 - minpos_half_asInt64) >> 63) + 1
-	xr = reinterpret(Float64,s*(xi + rand(Xor128[],Int64) >> 35))
-	return Float32sr(xr)
+    xi += rand(Xor128[],Int64) >> 35
+	return Float32sr(reinterpret(Float64,xi))
 end
 
-# const eps_F32 = Float64(nextfloat(zero(Float32)))
-# const subnormal_F32 = Float64(floatmin(Float32))
+const eps_F32 = Float64(nextfloat(zero(Float32)))
+const subnormal_F32 = Float64(floatmin(Float32))
 
-# version that also treats the subnormals correctly
-# function Float32_stochastic_round(x::Float64)
-# 	xr = abs(x) < subnormal_F32 ? x+eps_F32*(rand(Xor128[],Float64)-0.5) : 
-# 		reinterpret(Float64,reinterpret(Int64,x) + rand(Xor128[],Int64) >> 35)
-# 	return Float32sr(xr)
-# end
+# version that also treats the subnormals correctly
+function Float32_stochastic_round_subnormal(x::Float64)
+	xr = abs(x) < subnormal_F32 ? x+eps_F32*(rand(Xor128[],Float64)-0.5) : 
+		reinterpret(Float64,reinterpret(Int64,x) + rand(Xor128[],Int64) >> 35)
+	return Float32sr(xr)
+end
 
 """Chance that x::Float64 is round up when converted to Float32sr."""
 function Float32_chance_roundup(x::Float64)
