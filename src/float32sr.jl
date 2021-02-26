@@ -57,7 +57,7 @@ Gradual transition to round to nearest in the subnormals."""
 function Float32_stochastic_round(x::Float64)
     xi = reinterpret(Int64,x)
     xi += rand(Xor128[],Int64) >> 35
-	return Float32sr(reinterpret(Float64,xi))
+    return Float32sr(reinterpret(Float64,xi))
 end
 
 const eps_F32 = Float64(nextfloat(zero(Float32)))
@@ -65,9 +65,9 @@ const subnormal_F32 = Float64(floatmin(Float32))
 
 # version that also treats the subnormals correctly
 function Float32_stochastic_round_subnormal(x::Float64)
-	xr = abs(x) < subnormal_F32 ? x+eps_F32*(rand(Xor128[],Float64)-0.5) : 
-		reinterpret(Float64,reinterpret(Int64,x) + rand(Xor128[],Int64) >> 35)
-	return Float32sr(xr)
+    xr = abs(x) < subnormal_F32 ? x+eps_F32*(rand(Xor128[],Float64)-0.5) : 
+        reinterpret(Float64,reinterpret(Int64,x) + rand(Xor128[],Int64) >> 35)
+    return Float32sr(xr)
 end
 
 """Chance that x::Float64 is round up when converted to Float32sr."""
