@@ -50,7 +50,7 @@ Float16sr(x::Integer) = Float16sr(Float32(x))
 (::Type{T})(x::Float16sr) where {T<:Integer} = T(Float32(x))
 
 const eps_F16 = Float32(nextfloat(zero(Float16)))
-const subnormal_F16 = Float32(nextfloat(zero(Float16)))
+const subnormal_F16 = Float32(floatmin(Float16))
 
 function Float16_stochastic_round(x::Float32)
 	xr = abs(x) < subnormal_F16 ? x+eps_F16*(rand(Xor128[],Float32)-0.5f0) : 
