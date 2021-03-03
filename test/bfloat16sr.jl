@@ -24,6 +24,28 @@ end
     end
 end
 
+@testset "Odd floats are never round away" begin
+    N = 100_000 
+
+    f_odd = prevfloat(one(BFloat16sr))
+    f_odd_f32 = Float32(f_odd)
+    for _ = 1:N
+        @test f_odd == BFloat16sr(f_odd_f32)
+        @test f_odd == BFloat16_stochastic_round(f_odd_f32)
+    end
+end
+
+@testset "Even floats are never round away" begin
+    N = 100_000 
+
+    f_odd = prevfloat(prevfloat(one(BFloat16sr)))
+    f_odd_f32 = Float32(f_odd)
+    for _ = 1:N
+        @test f_odd == BFloat16sr(f_odd_f32)
+        @test f_odd == BFloat16_stochastic_round(f_odd_f32)
+    end
+end
+
 @testset "Rounding" begin
     @test 1 == Int(round(BFloat16sr(1.2)))
     @test 1 == Int(floor(BFloat16sr(1.2)))
@@ -41,8 +63,6 @@ end
 end
 
 @testset "Comparisons" begin
-
-    #STOCHASTIC ROUNDING
     @test BFloat16sr(1)   <  BFloat16sr(2)
     @test BFloat16sr(1f0) <  BFloat16sr(2f0)
     @test BFloat16sr(1.0) <  BFloat16sr(2.0)
@@ -56,249 +76,105 @@ end
     @test BFloat16sr(2.0) >= BFloat16sr(1.0)
 end
 
-N = 10000
-
 @testset "1.0 always to 1.0" begin
-    for i = 1:N
+    for i = 1:10000
         @test 1.0f0 == Float32(BFloat16sr(1.0f0))
         @test 1.0f0 == Float32(BFloat16_stochastic_round(1.0f0))
     end
 end
 
-@testset "1+eps/2 is round 50/50 up/down" begin
+function test_chances_round_bf16(f32::Float32;N::Int=100_000)
+    p = BFloat16_chance_roundup(f32)
 
-    p1 = 0
-    p2 = 0
-
-    eps = 0.0078125f0
-    x = 1 + eps/2
-
-    for i = 1:N
-        f = Float32(BFloat16_stochastic_round(x))
-        if 1.0f0 == f
-            p1 += 1
-        elseif 1 + eps == f
-            p2 += 1
-        end
+    f16_round = BFloat16sr(f32)
+    if Float32(f16_round) <= f32
+        f16_rounddown = f16_round
+        f16_roundup = nextfloat(f16_round)
+    else
+        f16_roundup = f16_round
+        f16_rounddown = prevfloat(f16_round)
     end
 
-    @test p1+p2 == N
-    @test p1/N > 0.45
-    @test p1/N < 0.55
+    Ndown = 0
+    Nup = 0 
+    for _ in 1:N
+        f16 = BFloat16_stochastic_round(f32)
+        if f16 == f16_rounddown
+            Ndown += 1
+        elseif f16 == f16_roundup
+            Nup += 1
+        end
+    end
+    
+    return Ndown,Nup,N,p
 end
 
-@testset "1+eps/4 is round 25% up" begin
-
-    p1 = 0
-    p2 = 0
-
-    eps = 0.0078125f0
-    x = 1 + eps/4
-
-    for i = 1:N
-        f = Float32(BFloat16_stochastic_round(x))
-        if 1.0f0 == f
-            p1 += 1
-        elseif 1 + eps == f
-            p2 += 1
-        end
-    end
-
-    @test p1+p2 == N
-    @test p1/N > 0.70
-    @test p1/N < 0.80
-end
-
-@testset "2+eps/4 is round 25% up" begin
-
-    p1 = 0
-    p2 = 0
-
-    eps = 0.0078125f0
-    x = 2 + eps/2
-
-    for i = 1:N
-        f = Float32(BFloat16_stochastic_round(x))
-        if 2.0f0 == f
-            p1 += 1
-        elseif 2 + 2eps == f
-            p2 += 1
-        end
-    end
-
-    @test p1+p2 == N
-    @test p1/N > 0.70
-    @test p1/N < 0.80
-end
-
-@testset "powers of 2 are not round" begin
-    for x in Float32[2,4,8,16,32,64,128,256,512,1024]
-        for i = 1:100
-            @test x == Float32(BFloat16_stochastic_round(x))
-            @test x == Float32(BFloat16sr(x))
-        end
-    end
-
-    for x in -Float32[2,4,8,16,32,64,128,256,512,1024]
-        for i = 1:100
-            @test x == Float32(BFloat16_stochastic_round(x))
-            @test x == Float32(BFloat16sr(x))
-        end
-    end
-
-    for x in Float32[1/2,1/4,1/8,1/16,1/32,1/64,1/128,1/256,1/512,1/1024]
-        for i = 1:100
-            @test x == Float32(BFloat16_stochastic_round(x))
-            @test x == Float32(BFloat16sr(x))
-        end
-    end
-
-    for x in -Float32[1/2,1/4,1/8,1/16,1/32,1/64,1/128,1/256,1/512,1/1024]
-        for i = 1:100
-            @test x == Float32(BFloat16_stochastic_round(x))
-            @test x == Float32(BFloat16sr(x))
-        end
+@testset "Test for N(0,1)" begin
+    for x in randn(Float32,10_000)
+        Ndown,Nup,N,p = test_chances_round_bf16(x)
+        @test Ndown + Nup == N
+        @test isapprox(Ndown/N,1-p,atol=2e-2)
+        @test isapprox(Nup/N,p,atol=2e-2)
     end
 end
 
-@testset "1+eps+eps/8 is round 12.5% up" begin
-
-    p1 = 0
-    p2 = 0
-    N = 100000
-
-    eps = 0.0078125f0
-    x = 1 + eps + eps/8
-
-    for i = 1:N
-        f = Float32(BFloat16_stochastic_round(x))
-        if 1.0f0 + eps == f
-            p1 += 1
-        elseif 1 + 2eps == f
-            p2 += 1
-        end
+@testset "Test for U(0,1)" begin
+    for x in rand(Float32,10_000)
+        Ndown,Nup,N,p = test_chances_round_bf16(x)
+        @test Ndown + Nup == N
+        @test isapprox(Ndown/N,1-p,atol=2e-2)
+        @test isapprox(Nup/N,p,atol=2e-2)
     end
-
-    @test p1+p2 == N
-    @test p1/N > 0.825
-    @test p1/N < 0.925
 end
 
-@testset "1+eps/8 is round 12.5% up" begin
-
-    p1 = 0
-    p2 = 0
-    N = 100000
-
-    eps = 0.0078125f0
-    x = 1 + eps/8
-
-    for i = 1:N
-        f = Float32(BFloat16_stochastic_round(x))
-        if 1.0f0 == f
-            p1 += 1
-        elseif 1 + eps == f
-            p2 += 1
-        end
-    end
-    println((p1/N,p2/N))
-    @test p1+p2 == N
-    @test p1/N > 0.825
-    @test p1/N < 0.925
-end
-
-@testset "-1-eps/8 is round 12.5% away from zero (i.e. down)" begin
-
-    p1 = 0
-    p2 = 0
-    N = 100000
-
-    eps = 0.0078125f0
-    x = -1 - eps/8
-
-    for i = 1:N
-        f = Float32(BFloat16_stochastic_round(x))
-        if -1.0f0 == f
-            p1 += 1
-        elseif -1 - eps == f
-            p2 += 1
-        end
-    end
-    println((p1/N,p2/N))
-    @test p1+p2 == N
-    @test p1/N > 0.825
-    @test p1/N < 0.925
-end
-
-@testset "1+eps/16 is round 6.25% up" begin
-
-    p1 = 0
-    p2 = 0
-    N = 100000
-
-    eps = 0.0078125f0
-    x = 1 + eps/16
-
-    for i = 1:N
-        f = Float32(BFloat16_stochastic_round(x))
-        if 1.0f0 == f
-            p1 += 1
-        elseif 1 + eps == f
-            p2 += 1
-        end
+@testset "Test for powers of two" begin
+    for x in Float32[2,4,8,16,32,64,128,256]
+        Ndown,Nup,N,p = test_chances_round_bf16(x)
+        @test Ndown + Nup == N
+        @test isapprox(Ndown/N,1-p,atol=2e-2)
+        @test isapprox(Nup/N,p,atol=2e-2)
     end
 
-    @test p1+p2 == N
-    @test p2/N > 0.05
-    @test p2/N < 0.08
-end
-
-@testset "2+eps/16 is round 6.25% up" begin
-
-    p1 = 0
-    p2 = 0
-    N = 100000
-
-    eps = 0.0078125f0
-    x = 2 + eps/8
-
-    for i = 1:N
-        f = Float32(BFloat16_stochastic_round(x))
-        if 2.0f0 == f
-            p1 += 1
-        elseif 2 + 2eps == f
-            p2 += 1
-        end
+    for x in -Float32[2,4,8,16,32,64,128,256]
+        Ndown,Nup,N,p = test_chances_round_bf16(x)
+        @test Ndown + Nup == N
+        @test isapprox(Ndown/N,1-p,atol=2e-2)
+        @test isapprox(Nup/N,p,atol=2e-2)
     end
 
-    @test p1+p2 == N
-    @test p2/N > 0.05
-    @test p2/N < 0.08
+    for x in Float32[1/2,1/4,1/8,1/16,1/32,1/64,1/128,1/256]
+        Ndown,Nup,N,p = test_chances_round_bf16(x)
+        @test Ndown + Nup == N
+        @test isapprox(Ndown/N,1-p,atol=2e-2)
+        @test isapprox(Nup/N,p,atol=2e-2)
+    end
+
+    for x in -Float32[1/2,1/4,1/8,1/16,1/32,1/64,1/128,1/256]
+        Ndown,Nup,N,p = test_chances_round_bf16(x)
+        @test Ndown + Nup == N
+        @test isapprox(Ndown/N,1-p,atol=2e-2)
+        @test isapprox(Nup/N,p,atol=2e-2)
+    end
 end
 
-@testset "Stochastic round for subnormals" begin
+@testset "Test for subnormals" begin
 
-    ulp_half = Float32(reinterpret(BFloat16sr,0x0001))/2
+    floatminBF16 = reinterpret(UInt32,Float32(floatmin(BFloat16sr)))
+    minposBF16 = reinterpret(UInt32,Float32(nextfloat(zero(BFloat16sr))))
 
-    for hex in 0x0000:0x008f    # test for all subnormals of Float16
+    N = 10_000
+    subnormals = reinterpret.(Float32,rand(minposBF16:floatminBF16,N))
+    for x in subnormals
+        Ndown,Nup,N,p = test_chances_round_bf16(x)
+        @test Ndown + Nup == N
+        @test isapprox(Ndown/N,1-p,atol=2e-2)
+        @test isapprox(Nup/N,p,atol=2e-2)
+    end
 
-        # add ulp/2 to have stochastic rounding that is 50/50 up/down.
-        x = Float32(reinterpret(BFloat16sr,hex)) + ulp_half
-
-        p1 = 0
-        p2 = 0
-
-        for i = 1:N
-            f = Float32(BFloat16_stochastic_round(x))
-            if f >= x
-                p1 += 1
-            else
-                p2 += 1
-            end
-        end
-
-        @test p1+p2 == N
-        @test p1/N > 0.45
-        @test p1/N < 0.55
+    for x in -subnormals
+        Ndown,Nup,N,p = test_chances_round_bf16(x)
+        @test Ndown + Nup == N
+        @test isapprox(Ndown/N,1-p,atol=2e-2)
+        @test isapprox(Nup/N,p,atol=2e-2)
     end
 end
