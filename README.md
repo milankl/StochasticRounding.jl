@@ -1,6 +1,9 @@
-[![Build Status](https://travis-ci.com/milankl/StochasticRounding.jl.svg?branch=master)](https://travis-ci.com/milankl/StochasticRounding.jl)
+<p align="center">
+<img width="10%" src="figs/logo.png">
+</p>
 
 # StochasticRounding.jl
+[![Build Status](https://travis-ci.com/milankl/StochasticRounding.jl.svg?branch=master)](https://travis-ci.com/milankl/StochasticRounding.jl)
 
 Stochastic rounding for floating-point arithmetic.
 
