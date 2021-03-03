@@ -81,7 +81,7 @@ And similarly for the other number types. Then with Julia 1.6 on an Intel(R) Cor
 | rounding mode         | Float64    | Float32    | Float16   | BFloat16    |
 | --------------------- | ---------- | ---------- | --------- | ----------- |
 | round to nearest      | 1132 μs    | 452 μs     | 1588 μs   | 354 μs      |
-| stochastic rounding   | n/a        | 2815 ms    | 3310 μs   | 4542 μs     |
+| stochastic rounding   | n/a        | 2815 μs    | 3310 μs   | 4542 μs     |
 
 Stochastic rounding imposes an about x5 performance decrease for Float32, only x2 for Float16, but >10x for BFloat16.
 For more complicated benchmarks the performance decrease is usually within x10.
