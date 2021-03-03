@@ -36,6 +36,7 @@ Base.abs(x::Float32sr) = reinterpret(Float32sr, abs(reinterpret(Float32,x)))
 Base.isnan(x::Float32sr) = isnan(reinterpret(Float32,x))
 Base.isfinite(x::Float32sr) = isfinite(reinterpret(Float32,x))
 
+Base.uinttype(::Type{Float32sr}) = UInt32
 Base.nextfloat(x::Float32sr) = Float32sr(nextfloat(Float32(x)))
 Base.prevfloat(x::Float32sr) = Float32sr(prevfloat(Float32(x)))
 
@@ -52,27 +53,20 @@ Base.Float64(x::Float32sr) = Float64(Float32(x))
 Float32sr(x::Integer) = Float32sr(Float32(x))
 (::Type{T})(x::Float32sr) where {T<:Integer} = T(Float32(x))
 
-const minpos_half = Float64(nextfloat(zero(Float32)))/2
-const minpos_half_asInt64 = reinterpret(Int64,minpos_half)
-const setsignzero_f64 = Int64(2^63-1)
+const eps_F32 = prevfloat(Float64(nextfloat(zero(Float32))))
+const floatmin_F32 = Float64(floatmin(Float32))
+const oneF64 = reinterpret(Int64,one(Float64))
 
-"""Convert to Float32sr from Float64 with stochastic rounding.
-Gradual transition to round to nearest in the subnormals."""
+"""Stochastically round x::Float64 to Float32 with distance-proportional probabilities."""
 function Float32_stochastic_round(x::Float64)
+    rbits = rand(Xor128[],Int64)        # create random bits
+    # subnormals are round with float-arithmetic for uniform stoch perturbation
+    abs(x) < floatmin_F32 && return Float32sr(x+eps_F32*(reinterpret(Float64,oneF64 | (rbits>>>12))-1.5))
     xi = reinterpret(Int64,x)
-    s = ((xi & setsignzero_f64 - minpos_half_asInt64) >> 63) + 1   # check whether x < minpos/2
-    xi += s*(rand(Xor128[],Int64) >> 35)                           # then set perturbation to 0
-    return Float32sr(reinterpret(Float64,xi))
-end
-
-const eps_F32 = Float64(nextfloat(zero(Float32)))
-const subnormal_F32 = Float64(floatmin(Float32))
-
-# version that also treats the subnormals correctly
-function Float32_stochastic_round_subnormal(x::Float64)
-    xr = abs(x) < subnormal_F32 ? x+eps_F32*(rand(Xor128[],Float64)-0.5) : 
-        reinterpret(Float64,reinterpret(Int64,x) + rand(Xor128[],Int64) >> 35)
-    return Float32sr(xr)
+    # arithmetic bitshift and |1 to create a random integer that is in (-u/2,u/2)
+    # always set last random bit to 1 to avoid the creating of -u/2
+    xr = reinterpret(Float64,xi + (rbits >> 35) | 1)
+    return Float32sr(xr)    # round to nearest
 end
 
 """Chance that x::Float64 is round up when converted to Float32sr."""

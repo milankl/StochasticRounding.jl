@@ -67,16 +67,18 @@ function BFloat16sr(x::Float32)
     return reinterpret(BFloat16sr, (h >> 16) % UInt16)
 end
 
-const minpos_half_asInt32 = Int32(2^15)  	# = Float32(nextfloat(zero(BFloat16)))/2
-const setsignzero = Int32(2^31-1)			# = 0x7fff_ffff to set sign to zero
+const minpos_half = reinterpret(Float32,0x0000_8000)
 
-"""Convert to BFloat16sr from Float32 with stochastic rounding.
-Binary arithmetic version."""
+"""Stochastically round x::Float32 to BFloat16 with distance-proportional probabilities."""
 function BFloat16_stochastic_round(x::Float32)
+	rbits = rand(Xor128[],Int32)	# create random bits
+	# branch off a return zero to avoid the integer wrap around producing NaNB16
+	abs(x) < minpos_half && return zero(BFloat16sr)
 	xi = reinterpret(Int32,x)
-	s = ((xi & setsignzero - minpos_half_asInt32) >> 31) + Int32(1)
-	xr = reinterpret(Float32,s*(xi + rand(Xor128[],Int32) >> 16))
-	return BFloat16sr(xr)
+	# arithmetic bitshift and |1 to create a random integer that is in (-u/2,u/2)
+	# always set last random bit to 1 to avoid the creating of -u/2
+	xr = reinterpret(Float32,xi + ((rbits >> 16) | one(Int32)))
+	return BFloat16sr(xr)		# round to nearest
 end
 
 """Chance that x::Float32 is round up when converted to BFloat16sr."""

@@ -33,6 +33,7 @@ Base.abs(x::Float16sr) = reinterpret(Float16sr, reinterpret(UInt16, x) & 0x7fff)
 Base.isnan(x::Float16sr) = isnan(Float16(x))
 Base.isfinite(x::Float16sr) = isfinite(Float16(x))
 
+Base.uinttype(::Type{Float16sr}) = UInt16
 Base.nextfloat(x::Float16sr) = Float16sr(nextfloat(Float16(x)))
 Base.prevfloat(x::Float16sr) = Float16sr(prevfloat(Float16(x)))
 
@@ -49,13 +50,20 @@ Base.Float64(x::Float16sr) = Float64(Float16(x))
 Float16sr(x::Integer) = Float16sr(Float32(x))
 (::Type{T})(x::Float16sr) where {T<:Integer} = T(Float32(x))
 
-const eps_F16 = Float32(nextfloat(zero(Float16)))
-const subnormal_F16 = Float32(floatmin(Float16))
+const eps_F16 = prevfloat(Float32(nextfloat(zero(Float16))))
+const floatmin_F16 = Float32(floatmin(Float16))
+const oneF32 = reinterpret(Int32,one(Float32))
 
+"""Stochastically round x::Float32 to Float16 with distance-proportional probabilities."""
 function Float16_stochastic_round(x::Float32)
-	xr = abs(x) < subnormal_F16 ? x+eps_F16*(rand(Xor128[],Float32)-0.5f0) : 
-		reinterpret(Float32,reinterpret(Int32,x) + rand(Xor128[],Int32) >> 19)
-	return Float16sr(xr)
+    rbits = rand(Xor128[],Int32)        # create random bits
+    # subnormals are round with float-arithmetic for uniform stoch perturbation
+    abs(x) < floatmin_F16 && return Float16sr(x+eps_F16*(reinterpret(Float32,oneF32 | (rbits>>>9))-1.5f0))
+    xi = reinterpret(Int32,x)
+    # arithmetic bitshift and |1 to create a random integer that is in (-u/2,u/2)
+    # always set last random bit to 1 to avoid the creating of -u/2
+    xr = reinterpret(Float32,xi + (rbits >> 19) | one(Int32))
+    return Float16sr(xr)    # round to nearest
 end
 
 """Chance that x::Float32 is round up when converted to Float16sr."""
