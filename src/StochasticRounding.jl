@@ -5,9 +5,7 @@ module StochasticRounding
         Float16sr,Float16_stochastic_round,             # Float16 + SR
         Float16_chance_roundup,NaN16sr,Inf16sr,
         Float32sr,Float32_stochastic_round,             # Float32 + SR
-        Float32_chance_roundup,NaN32sr,Inf32sr,
-        FastFloat16sr,FastFloat16_stochastic_round,     # FastFloat16 + SR
-        NaNF16sr,InfF16sr
+        Float32_chance_roundup,NaN32sr,Inf32sr
 
     # faster random number generator
     import RandomNumbers.Xorshifts.Xoroshiro128Plus
@@ -27,6 +25,5 @@ module StochasticRounding
     include("bfloat16sr.jl")
     include("float16sr.jl")
     include("float32sr.jl")
-    include("fast_float16sr.jl")
 
 end
