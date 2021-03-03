@@ -56,17 +56,7 @@ For stochastic rounding, only at 80% chance x is round down. At 20% chance it is
 
 ### Subnormals
 
-The subnormals are treated differently as a compromise between speed and functionality
-- `Float32sr` uses a gradual transition* to round to nearest within the subnormals, |x|<minpos/2 is always round to 0,
-- `FastFloat16sr` also uses the gradual transition*.
-- `Float16sr` stochastically rounds all subnormals correctly,
-- `BFloat16sr` as well, but |x|<minpos/2 is always round to 0.
-
-Gradual transition means the following. Let `sn` be *the* subnormal, i.e. `floatmin`. Then
-- in [sn/2,sn) only x in [ulp/4,3ulp/4] is round stochastically, round to nearest else. (ulp is the distance between two representable numbers)
-- in [sn/4,sn/2) only x in [3ulp/8,5ulp/8] is round stochastically, round to nearest else.
-- in [sn/8,sn/4) only x in [7ulp/16,9ulp/16] is round stochastically, round to nearest else.
-- etc.
+From v0.6 onwards all subnormals of Float32, Float16, BFloat16 are always accounted for in the stochastic rounding.
 
 ### Installation
 StochasticRounding.jl is registered in the Julia registry. Hence, simply do
@@ -77,20 +67,19 @@ where `]` opens the package manager.
 
 ### Performance
 
-StochasticRounding.jl is to my knowledge among the fastest software implementation of stochastic rounding for floating-point arithmetic. Define a few random 1000x1000 matrices
+StochasticRounding.jl is among the fastest software implementation of stochastic rounding for floating-point arithmetic. Define a few random 1000000-element arrays
 ```julia
 julia> using StochasticRounding, BenchmarkTools, BFloat16s
-julia> A1 = rand(Float32,1000,1000);
-julia> A2 = rand(Float32,1000,1000);   # A1, A2 shouldn't be identical as a+a=2a is not round
-julia> B1,B2 = Float32sr.(A1),Float32sr.(A2);
+julia> A = rand(Float64,1000000);
+julia> B = rand(Float64,1000000);   # A, B shouldn't be identical as a+a=2a is not round
 ```
-And similarly for the other number types. Then on an Intel(R) Core(R) i5 (Ice Lake) @ 1.1GHz timings via `@btime +($A1,$A2)` etc. are
+And similarly for the other number types. Then with Julia 1.6 on an Intel(R) Core(R) i5 (Ice Lake) @ 1.1GHz timings via `@btime +($A,$B)` are
 
-| rounding mode         | Float32    | BFloat16   | Float64   | [FastFloat16](https://github.com/milankl/FastFloat16s.jl) | Float16   |
-| --------------------- | ---------- | ---------- | --------- | ----------- | --------- |
-| round to nearest      | 460 μs     | 556 μs     | 1.151ms   | 629 μs      | 16.446 ms |
-| stochastic rounding   | 2.585 ms   | 3.820 ms   | n/a       | 3.591 ms    | 18.611 ms |
+| rounding mode         | Float64    | Float32    | Float16   | BFloat16    |
+| --------------------- | ---------- | ---------- | --------- | ----------- |
+| round to nearest      | 1132 μs    | 452 μs     | 1588 μs   | 354 μs      |
+| stochastic rounding   | n/a        | 2815 ms    | 3310 μs   | 4542 μs     |
 
-Stochastic rounding imposes an about x5-7 performance decrease for Float32/BFloat16, but is almost negligible for Float16. 
-For Float32sr about 50% of the time is spend on the random number generation, a bit less than 50% on the addition in
-Float64 and the rest is the addition of the random number on the result and round to nearest.
+Stochastic rounding imposes an about x5 performance decrease for Float32, only x2 for Float16, but >10x for BFloat16.
+For more complicated benchmarks the performance decrease is usually within x10.
+About 50% of the time is spend on the random number generation with Xoroshiro128+.
