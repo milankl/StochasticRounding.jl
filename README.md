@@ -3,7 +3,7 @@
 </p>
 
 # StochasticRounding.jl
-[![CI](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml)
+[![CI](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml)   
 Stochastic rounding for floating-point arithmetic.
 
 This package exports `Float32sr`,`Float16sr`, and `BFloat16sr`, four number formats that behave
