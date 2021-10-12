@@ -78,6 +78,9 @@ end
     @test isnan(NaN32sr)
     @test ~isfinite(NaN32sr)
     @test ~isfinite(Inf32sr)
+    @test isnan(Float32_stochastic_round(NaN))
+    @test Inf32 == Float32(Float32_stochastic_round(Inf))
+    @test -Inf32 == Float32(Float32_stochastic_round(-Inf))
 end
 
 @testset "No stochastic round to NaN" begin
@@ -163,7 +166,7 @@ end
     floatminF32 = reinterpret(UInt64,Float64(floatmin(Float32)))
     minposF32 = reinterpret(UInt64,Float64(nextfloat(zero(Float32))))
 
-    N = 10_000
+    N = 10
     subnormals = reinterpret.(Float64,rand(minposF32:floatminF32,N))
     for x in subnormals
         @test test_chances_round(x)

@@ -58,15 +58,27 @@ const floatmin_F32 = Float64(floatmin(Float32))
 const oneF64 = reinterpret(Int64,one(Float64))
 
 """Stochastically round x::Float64 to Float32 with distance-proportional probabilities."""
+# function Float32_stochastic_round(x::Float64)
+#     rbits = rand(Xor128[],Int64)        # create random bits
+#     # subnormals are round with float-arithmetic for uniform stoch perturbation
+#     abs(x) < floatmin_F32 && return Float32sr(x+eps_F32*(reinterpret(Float64,oneF64 | (rbits>>>12))-1.5))
+#     xi = reinterpret(Int64,x)
+#     # arithmetic bitshift and |1 to create a random integer that is in (-u/2,u/2)
+#     # always set last random bit to 1 to avoid the creating of -u/2
+#     xr = reinterpret(Float64,xi + (rbits >> 35) | 1)
+#     return Float32sr(xr)    # round to nearest
+# end
+
+"""Stochastically round x::Float64 to Float32 with distance-proportional probabilities."""
 function Float32_stochastic_round(x::Float64)
-    rbits = rand(Xor128[],Int64)        # create random bits
     # subnormals are round with float-arithmetic for uniform stoch perturbation
-    abs(x) < floatmin_F32 && return Float32sr(x+eps_F32*(reinterpret(Float64,oneF64 | (rbits>>>12))-1.5))
-    xi = reinterpret(Int64,x)
-    # arithmetic bitshift and |1 to create a random integer that is in (-u/2,u/2)
-    # always set last random bit to 1 to avoid the creating of -u/2
-    xr = reinterpret(Float64,xi + (rbits >> 35) | 1)
-    return Float32sr(xr)    # round to nearest
+    # abs(x) < floatmin_F32 && return Float32sr(Float32(x+eps_F32*rand(Xor128[],Float64),RoundToZero))
+    abs(x) < floatmin_F32 && return Float32sr(x+eps_F32*(reinterpret(Float64,oneF64 | (rand(Int64)>>>12))-1.5))
+    ui = reinterpret(UInt64,x)
+	ui += (rand(Xor128[],UInt64) & 0x0000_0000_1fff_ffff)
+    ui &= 0xffff_ffff_e000_0000
+    f32 = Float32(reinterpret(Float64,ui))
+	return reinterpret(Float32sr,f32)
 end
 
 """Chance that x::Float64 is round up when converted to Float32sr."""
