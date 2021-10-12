@@ -81,6 +81,13 @@ end
     @test isnan(Float32_stochastic_round(NaN))
     @test Inf32 == Float32(Float32_stochastic_round(Inf))
     @test -Inf32 == Float32(Float32_stochastic_round(-Inf))
+
+    N = 1000
+    for i in 1:N
+        @test Inf32sr == Float32_stochastic_round(Inf)
+        @test -Inf32sr == Float32_stochastic_round(-Inf)
+        @test isnan(Float32_stochastic_round(NaN))
+    end
 end
 
 @testset "No stochastic round to NaN" begin

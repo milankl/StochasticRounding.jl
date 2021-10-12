@@ -13,6 +13,13 @@ end
     @test isnan(NaNB16sr)
     @test ~isfinite(NaNB16sr)
     @test ~isfinite(InfB16sr)
+
+    N = 1000
+    for i in 1:N
+        @test InfB16sr == BFloat16_stochastic_round(Inf32)
+        @test -InfB16sr == BFloat16_stochastic_round(-Inf32)
+        @test isnan(BFloat16_stochastic_round(NaN32))
+    end
 end
 
 @testset "No stochastic round to NaN" begin
