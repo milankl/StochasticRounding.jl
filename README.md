@@ -69,19 +69,21 @@ where `]` opens the package manager.
 
 ### Performance
 
-StochasticRounding.jl is among the fastest software implementation of stochastic rounding for floating-point arithmetic. Define a few random 1000000-element arrays
+StochasticRounding.jl is among the fastest software implementation of stochastic rounding for floating-point arithmetic.
+Define a few random 1000000-element arrays
 ```julia
 julia> using StochasticRounding, BenchmarkTools, BFloat16s
 julia> A = rand(Float64,1000000);
 julia> B = rand(Float64,1000000);   # A, B shouldn't be identical as a+a=2a is not round
 ```
-And similarly for the other number types. Then with Julia 1.6 on an Intel(R) Core(R) i5 (Ice Lake) @ 1.1GHz timings via `@btime +($A,$B)` are
+And similarly for the other number types. Then with Julia 1.6 on an Intel(R) Core(R) i5 (Ice Lake) @ 1.1GHz timings via
+`@btime +($A,$B)` are
 
 | rounding mode         | Float64    | Float32    | Float16   | BFloat16    |
 | --------------------- | ---------- | ---------- | --------- | ----------- |
-| round to nearest      | 1132 μs    |  452 μs    | 1588 μs   |  354 μs     |
-| stochastic rounding   | n/a        | 2815 μs    | 3310 μs   | 4100 μs     |
+| round to nearest      | 1132 μs    |  452 μs    | 1588 μs   |  315 μs     |
+| stochastic rounding   | n/a        | 2650 μs    | 3310 μs   | 1850 μs     |
 
-Stochastic rounding imposes an about x5 performance decrease for Float32, only x2 for Float16, but >10x for BFloat16.
+Stochastic rounding imposes an about x5 performance decrease for Float32 and BFloat16, but only x2 for Float16.
 For more complicated benchmarks the performance decrease is usually within x10.
 About 50% of the time is spend on the random number generation with Xoroshiro128+.
