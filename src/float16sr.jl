@@ -55,18 +55,6 @@ const floatmin_F16 = Float32(floatmin(Float16))
 const oneF32 = reinterpret(Int32,one(Float32))
 
 """Stochastically round x::Float32 to Float16 with distance-proportional probabilities."""
-# function Float16_stochastic_round(x::Float32)
-#     rbits = rand(Xor128[],Int32)        # create random bits
-#     # subnormals are round with float-arithmetic for uniform stoch perturbation
-#     abs(x) < floatmin_F16 && return Float16sr(x+eps_F16*(reinterpret(Float32,oneF32 | (rbits>>>9))-1.5f0))
-#     xi = reinterpret(Int32,x)
-#     # arithmetic bitshift and |1 to create a random integer that is in (-u/2,u/2)
-#     # always set last random bit to 1 to avoid the creating of -u/2
-#     xr = reinterpret(Float32,xi + (rbits >> 19) | one(Int32))
-#     return Float16sr(xr)    # round to nearest
-# end
-
-"""Stochastically round x::Float32 to Float16 with distance-proportional probabilities."""
 function Float16_stochastic_round(x::Float32)
     rbits = rand(Xor128[],UInt32)   # create random bits
 
