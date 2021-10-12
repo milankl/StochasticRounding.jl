@@ -73,7 +73,7 @@ const oneF64 = reinterpret(Int64,one(Float64))
 function Float32_stochastic_round(x::Float64)
     # subnormals are round with float-arithmetic for uniform stoch perturbation
     # abs(x) < floatmin_F32 && return Float32sr(Float32(x+eps_F32*rand(Xor128[],Float64),RoundToZero))
-    abs(x) < floatmin_F32 && return Float32sr(x+eps_F32*(reinterpret(Float64,oneF64 | (rand(Int64)>>>12))-1.5))
+    abs(x) < floatmin_F32 && return Float32sr(x+eps_F32*(reinterpret(Float64,oneF64 | (rand(Xor128[],Int64)>>>12))-1.5))
     ui = reinterpret(UInt64,x)
 	ui += (rand(Xor128[],UInt64) & 0x0000_0000_1fff_ffff)
     ui &= 0xffff_ffff_e000_0000
