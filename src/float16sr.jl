@@ -56,14 +56,17 @@ const oneF32 = reinterpret(Int32,one(Float32))
 
 """Stochastically round x::Float32 to Float16 with distance-proportional probabilities."""
 function Float16_stochastic_round(x::Float32)
-    rbits = rand(Xor128[],Int32)        # create random bits
-    # subnormals are round with float-arithmetic for uniform stoch perturbation
-    abs(x) < floatmin_F16 && return Float16sr(x+eps_F16*(reinterpret(Float32,oneF32 | (rbits>>>9))-1.5f0))
-    xi = reinterpret(Int32,x)
-    # arithmetic bitshift and |1 to create a random integer that is in (-u/2,u/2)
-    # always set last random bit to 1 to avoid the creating of -u/2
-    xr = reinterpret(Float32,xi + (rbits >> 19) | one(Int32))
-    return Float16sr(xr)    # round to nearest
+    rbits = rand(Xor128[],UInt32)   # create random bits
+
+    # subnormals are rounded with float-arithmetic for uniform stoch perturbation
+    abs(x) < floatmin_F16 && return Float16sr(x+eps_F16*(reinterpret(Float32,oneF32 | (rand(Xor128[],UInt32) >> 9))-1.5f0))
+
+	ui = reinterpret(UInt32,x)
+	ui += (rbits & 0x0000_1fff)     # add perturbation in [0,u)
+    ui &= 0xffff_e000               # round to zero
+
+    # convert to Float16 to adjust exponent bits
+	return reinterpret(Float16sr,Float16(reinterpret(Float32,ui)))  
 end
 
 """Chance that x::Float32 is round up when converted to Float16sr."""
