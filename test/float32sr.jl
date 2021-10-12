@@ -166,7 +166,7 @@ end
     floatminF32 = reinterpret(UInt64,Float64(floatmin(Float32)))
     minposF32 = reinterpret(UInt64,Float64(nextfloat(zero(Float32))))
 
-    N = 10_000
+    N = 100
     subnormals = reinterpret.(Float64,rand(minposF32:floatminF32,N))
     for x in subnormals
         @test test_chances_round(x)
