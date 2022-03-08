@@ -61,22 +61,22 @@ function Float16_stochastic_round(x::Float32)
     # subnormals are rounded with float-arithmetic for uniform stoch perturbation
     abs(x) < floatmin_F16 && return Float16sr(x+eps_F16*(reinterpret(Float32,oneF32 | (rand(Xor128[],UInt32) >> 9))-1.5f0))
 
-	ui = reinterpret(UInt32,x)
-	ui += (rbits & 0x0000_1fff)     # add perturbation in [0,u)
+    ui = reinterpret(UInt32,x)
+    ui += (rbits & 0x0000_1fff)     # add perturbation in [0,u)
     ui &= 0xffff_e000               # round to zero
 
     # convert to Float16 to adjust exponent bits
-	return reinterpret(Float16sr,Float16(reinterpret(Float32,ui)))  
+    return reinterpret(Float16sr,Float16(reinterpret(Float32,ui)))  
 end
 
 """Chance that x::Float32 is round up when converted to Float16sr."""
 function Float16_chance_roundup(x::Float32)
-	xround = Float32(Float16(x))
-	xround == x && return zero(Float32)
-	xround_down, xround_up = xround < x ? (xround,Float32(nextfloat(Float16(xround)))) :
-		(Float32(prevfloat(Float16(xround))),xround)
-	
-	return (x-xround_down)/(xround_up-xround_down)
+    xround = Float32(Float16(x))
+    xround == x && return zero(Float32)
+    xround_down, xround_up = xround < x ? (xround,Float32(nextfloat(Float16(xround)))) :
+        (Float32(prevfloat(Float16(xround))),xround)
+    
+    return (x-xround_down)/(xround_up-xround_down)
 end
 
 # Promotion
@@ -96,7 +96,7 @@ Base.round(x::Float16sr, r::RoundingMode{:Nearest}) = Float16sr(round(Float32(x)
 # Comparison
 import Base.:(==)
 function ==(x::Float16sr, y::Float16sr)
-	return Float16(x) == Float16(y)
+    return Float16(x) == Float16(y)
 end
 
 for op in (:<, :<=, :isless)
@@ -105,7 +105,7 @@ end
 
 # Arithmetic
 for f in (:+, :-, :*, :/, :^)
-	@eval Base.$f(x::Float16sr, y::Float16sr) = Float16_stochastic_round($(f)(Float32(x), Float32(y)))
+    @eval Base.$f(x::Float16sr, y::Float16sr) = Float16_stochastic_round($(f)(Float32(x), Float32(y)))
 end
 
 for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,
@@ -127,7 +127,7 @@ function Base.show(io::IO, x::Float16sr)
     elseif isnan(x)
         print(io, "NaN16")
     else
-		io2 = IOBuffer()
+        io2 = IOBuffer()
         print(io2,Float32(x))
         f = String(take!(io2))
         print(io,"Float16sr("*f*")")
@@ -139,7 +139,7 @@ Base.bitstring(x::Float16sr) = bitstring(reinterpret(UInt16,x))
 function Base.bitstring(x::Float16sr,mode::Symbol)
     if mode == :split	# split into sign, exponent, signficand
         s = bitstring(x)
-		return "$(s[1]) $(s[2:6]) $(s[7:end])"
+        return "$(s[1]) $(s[2:6]) $(s[7:end])"
     else
         return bitstring(x)
     end

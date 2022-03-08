@@ -69,24 +69,24 @@ end
 
 """Stochastically round x::Float32 to BFloat16 with distance-proportional probabilities."""
 function BFloat16_stochastic_round(x::Float32)
-	ui = reinterpret(UInt32,x)
-	ui += rand(Xor128[],UInt16)							# add stochastic perturbation in [0,u)
-	return reinterpret(BFloat16sr,(ui >> 16) % UInt16)	# round to zero and convert to BFloat16
+    ui = reinterpret(UInt32,x)
+    ui += rand(Xor128[],UInt16)							# add stochastic perturbation in [0,u)
+    return reinterpret(BFloat16sr,(ui >> 16) % UInt16)	# round to zero and convert to BFloat16
 end
 
 """Chance that x::Float32 is round up when converted to BFloat16sr."""
 function BFloat16_chance_roundup(x::Float32)
-	xround = Float32(BFloat16(x))
-	xround == x && return zero(Float32)
-	xround_down, xround_up = xround < x ? (xround,Float32(nextfloat(BFloat16sr(xround)))) :
-		(Float32(prevfloat(BFloat16sr(xround))),xround)
-	
-	return (x-xround_down)/(xround_up-xround_down)
+    xround = Float32(BFloat16(x))
+    xround == x && return zero(Float32)
+    xround_down, xround_up = xround < x ? (xround,Float32(nextfloat(BFloat16sr(xround)))) :
+        (Float32(prevfloat(BFloat16sr(xround))),xround)
+    
+    return (x-xround_down)/(xround_up-xround_down)
 end
 
 # Basic arithmetic
 for f in (:+, :-, :*, :/, :^)
-	@eval Base.$f(x::BFloat16sr, y::BFloat16sr) = BFloat16_stochastic_round($(f)(Float32(x), Float32(y)))
+    @eval Base.$f(x::BFloat16sr, y::BFloat16sr) = BFloat16_stochastic_round($(f)(Float32(x), Float32(y)))
 end
 
 # negation via signbit flip
@@ -121,7 +121,7 @@ Base.promote_rule(::Type{Float32}, ::Type{BFloat16sr}) = Float32
 Base.promote_rule(::Type{Float64}, ::Type{BFloat16sr}) = Float64
 
 for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128)
-	@eval Base.promote_rule(::Type{BFloat16sr}, ::Type{$t}) = BFloat16sr
+    @eval Base.promote_rule(::Type{BFloat16sr}, ::Type{$t}) = BFloat16sr
 end
 
 # Showing
@@ -131,7 +131,7 @@ function Base.show(io::IO, x::BFloat16sr)
     elseif isnan(x)
         print(io, "NaNB16")
     else
-		io2 = IOBuffer()
+        io2 = IOBuffer()
         print(io2,Float32(x))
         f = String(take!(io2))
         print(io,"BFloat16sr("*f*")")
@@ -143,7 +143,7 @@ Base.bitstring(x::BFloat16sr) = bitstring(reinterpret(UInt16,x))
 function Base.bitstring(x::BFloat16sr,mode::Symbol)
     if mode == :split	# split into sign, exponent, signficand
         s = bitstring(x)
-		return "$(s[1]) $(s[2:9]) $(s[10:end])"
+        return "$(s[1]) $(s[2:9]) $(s[10:end])"
     else
         return bitstring(x)
     end
@@ -151,30 +151,30 @@ end
 
 function Base.nextfloat(x::BFloat16sr)
     if isfinite(x)
-		ui = reinterpret(UInt16,x)
-		if ui < 0x8000	# positive numbers
-			return reinterpret(BFloat16sr,ui+0x0001)
-		elseif ui == 0x8000		# =-zero(T)
-			return reinterpret(BFloat16sr,0x0001)
-		else				# negative numbers
-			return reinterpret(BFloat16sr,ui-0x0001)
-		end
-	else	# NaN / Inf case
-		return x
-	end
+        ui = reinterpret(UInt16,x)
+        if ui < 0x8000	# positive numbers
+            return reinterpret(BFloat16sr,ui+0x0001)
+        elseif ui == 0x8000		# =-zero(T)
+            return reinterpret(BFloat16sr,0x0001)
+        else				# negative numbers
+            return reinterpret(BFloat16sr,ui-0x0001)
+        end
+    else	# NaN / Inf case
+        return x
+    end
 end
 
 function Base.prevfloat(x::BFloat16sr)
     if isfinite(x)
-		ui = reinterpret(UInt16,x)
-		if ui == 0x0000		# =zero(T)
-			return reinterpret(BFloat16sr,0x8001)
-		elseif ui < 0x8000	# positive numbers
-			return reinterpret(BFloat16sr,ui-0x0001)
-		else				# negative numbers
-			return reinterpret(BFloat16sr,ui+0x0001)
-		end
-	else	# NaN / Inf case
-		return x
-	end
+        ui = reinterpret(UInt16,x)
+        if ui == 0x0000		# =zero(T)
+            return reinterpret(BFloat16sr,0x8001)
+        elseif ui < 0x8000	# positive numbers
+            return reinterpret(BFloat16sr,ui-0x0001)
+        else				# negative numbers
+            return reinterpret(BFloat16sr,ui+0x0001)
+        end
+    else	# NaN / Inf case
+        return x
+    end
 end
