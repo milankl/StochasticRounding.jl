@@ -94,13 +94,8 @@ Base.round(x::Float16sr, r::RoundingMode{:Up}) = Float16sr(round(Float32(x), r))
 Base.round(x::Float16sr, r::RoundingMode{:Nearest}) = Float16sr(round(Float32(x), r))
 
 # Comparison
-import Base.:(==)
-function ==(x::Float16sr, y::Float16sr)
-    return Float16(x) == Float16(y)
-end
-
-for op in (:<, :<=, :isless)
-    @eval Base.$op(a::Float16sr, b::Float16sr) = ($op)(Float32(a), Float32(b))
+for op in (:(==), :<, :<=, :isless)
+    @eval Base.$op(a::Float16sr, b::Float16sr) = ($op)(Float16(a), Float16(b))
 end
 
 # Arithmetic
