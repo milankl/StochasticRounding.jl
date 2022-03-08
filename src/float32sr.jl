@@ -65,19 +65,19 @@ function Float32_stochastic_round(x::Float64)
     abs(x) < floatmin_F32 && return Float32sr(x+eps_F32*(reinterpret(Float64,oneF64 | (rbits >> 12))-1.5))
 
     ui = reinterpret(UInt64,x)
-	ui += (rbits & 0x0000_0000_1fff_ffff)       # add stochastic perturbation in [0,u)
+    ui += (rbits & 0x0000_0000_1fff_ffff)       # add stochastic perturbation in [0,u)
     ui &= 0xffff_ffff_e000_0000                 # round to zero 
-	return reinterpret(Float32sr,Float32(reinterpret(Float64,ui)))
+    return reinterpret(Float32sr,Float32(reinterpret(Float64,ui)))
 end
 
 """Chance that x::Float64 is round up when converted to Float32sr."""
 function Float32_chance_roundup(x::Float64)
-	xround = Float64(Float32(x))
-	xround == x && return zero(Float64)
-	xround_down, xround_up = xround < x ? (xround,Float64(nextfloat(Float32(xround)))) :
-		(Float64(prevfloat(Float32(xround))),xround)
-	
-	return (x-xround_down)/(xround_up-xround_down)
+    xround = Float64(Float32(x))
+    xround == x && return zero(Float64)
+    xround_down, xround_up = xround < x ? (xround,Float64(nextfloat(Float32(xround)))) :
+        (Float64(prevfloat(Float32(xround))),xround)
+    
+    return (x-xround_down)/(xround_up-xround_down)
 end
 
 # Promotion
@@ -95,18 +95,13 @@ Base.round(x::Float32sr, r::RoundingMode{:Up}) = Float32sr(round(Float32(x), r))
 Base.round(x::Float32sr, r::RoundingMode{:Nearest}) = Float32sr(round(Float32(x), r))
 
 # Comparison
-import Base.:(==)
-function ==(x::Float32sr, y::Float32sr)
-	return Float32(x) == Float32(y)
-end
-
-for op in (:<, :<=, :isless)
+for op in (:(==), :<, :<=, :isless)
     @eval Base.$op(a::Float32sr, b::Float32sr) = ($op)(Float32(a), Float32(b))
 end
 
 # Arithmetic
 for f in (:+, :-, :*, :/, :^)
-	@eval Base.$f(x::Float32sr, y::Float32sr) = Float32_stochastic_round($(f)(Float64(x), Float64(y)))
+    @eval Base.$f(x::Float32sr, y::Float32sr) = Float32_stochastic_round($(f)(Float64(x), Float64(y)))
 end
 
 for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,
@@ -130,7 +125,7 @@ function Base.show(io::IO, x::Float32sr)
     elseif isnan(x)
         print(io, "NaN32sr")
     else
-		io2 = IOBuffer()
+        io2 = IOBuffer()
         print(io2,Float32(x))
         f = String(take!(io2))
         print(io,"Float32sr("*f*")")
@@ -142,7 +137,7 @@ Base.bitstring(x::Float32sr) = bitstring(reinterpret(UInt32,x))
 function Base.bitstring(x::Float32sr,mode::Symbol)
     if mode == :split	# split into sign, exponent, signficand
         s = bitstring(x)
-		return "$(s[1]) $(s[2:9]) $(s[10:end])"
+        return "$(s[1]) $(s[2:9]) $(s[10:end])"
     else
         return bitstring(x)
     end
