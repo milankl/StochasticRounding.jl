@@ -1,3 +1,4 @@
+import BFloat16s.BFloat16
 """Float16 + stochastic rounding type."""
 primitive type Float16sr <: AbstractFloat 16 end
 
@@ -46,6 +47,10 @@ Float16sr(x::Float32) = Float16sr(Float16(x))
 Float16sr(x::Float64) = Float16sr(Float32(x))
 Base.Float32(x::Float16sr) = Float32(Float16(x))
 Base.Float64(x::Float16sr) = Float64(Float16(x))
+
+# converting to and from BFloat16
+Float16sr(x::BFloat16) = Float16sr(Float32(x))
+BFloat16(x::Float16sr) = BFloat16(Float16(x))
 
 Float16sr(x::Integer) = Float16sr(Float32(x))
 (::Type{T})(x::Float16sr) where {T<:Integer} = T(Float32(x))
