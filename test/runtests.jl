@@ -1,5 +1,7 @@
 using StochasticRounding
 using Test
+using DifferentialEquations
+
 
 include("bfloat16sr.jl")
 include("float16sr.jl")
