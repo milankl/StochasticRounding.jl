@@ -5,11 +5,16 @@ module StochasticRounding
         Float16sr,Float16_stochastic_round,             # Float16 + SR
         Float16_chance_roundup,NaN16sr,Inf16sr,
         Float32sr,Float32_stochastic_round,             # Float32 + SR
-        Float32_chance_roundup,NaN32sr,Inf32sr
+        Float32_chance_roundup,NaN32sr,Inf32sr,
+        Float64sr,Float64_stochastic_round,             # Float64 + SR
+        NaNsr,Infsr
+
 
     # faster random number generator
     import RandomNumbers.Xorshifts.Xoroshiro128Plus
     const Xor128 = Ref{Xoroshiro128Plus}(Xoroshiro128Plus())
+
+    import DoubleFloats: DoubleFloats, Double64
 
     """Reseed the PRNG randomly by recalling."""
     function __init__()
@@ -25,5 +30,6 @@ module StochasticRounding
     include("bfloat16sr.jl")
     include("float16sr.jl")
     include("float32sr.jl")
+    include("float64sr.jl")
 
 end
