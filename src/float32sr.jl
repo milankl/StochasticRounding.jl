@@ -83,7 +83,7 @@ end
 # Promotion
 Base.promote_rule(::Type{Float16}, ::Type{Float32sr}) = Float32
 Base.promote_rule(::Type{Float64}, ::Type{Float32sr}) = Float64
-
+Base.promote_rule(::Type{Float32}, ::Type{Float32sr}) = Float32
 
 for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128)
     @eval Base.promote_rule(::Type{Float32sr}, ::Type{$t}) = Float32sr
@@ -145,17 +145,7 @@ function Base.bitstring(x::Float32sr,mode::Symbol)
 end
 
 # BIGFLOAT
-Base.BigFloat(x::Float32sr) = Float32_stochastic_round(Float64(x))
 Float32sr(x::BigFloat) = Float32sr(Float64(x))
+Base.decompose(x::Float32sr) = Base.decompose(Float32(x))
 
 
-function Base.decompose(x::Float32sr)::NTuple{3,Int}
-    isnan(x) && return 0, 0, 0
-    isinf(x) && return ifelse(x < 0, -1, 1), 0, 0
-    n = reinterpret(UInt32, x)
-    s = (n & 0x007fffff) % Int32
-    e = ((n & 0x7f800000) >> 23) % Int
-    s |= Int32(e != 0) << 23
-    d = ifelse(signbit(x), -1, 1)
-    s, e - 150 + (e == 0), d
-end

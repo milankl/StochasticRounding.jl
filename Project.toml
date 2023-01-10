@@ -5,6 +5,7 @@ version = "0.6.2"
 
 [deps]
 BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 RandomNumbers = "e6cf234a-135c-5ec9-84dd-332b85af5143"
 
 [compat]
@@ -14,7 +15,6 @@ julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 
 [targets]
-test = ["Test","DifferentialEquations"]
+test = ["Test"]
