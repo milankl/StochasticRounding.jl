@@ -178,3 +178,11 @@ function Base.prevfloat(x::BFloat16sr)
         return x
     end
 end
+
+#BigFloat
+BFloat16sr(x::BigFloat) = BFloat16sr(Float64(x))
+Base.decompose(x::BFloat16sr) = Base.decompose(Float16(x))
+
+#eps
+Base.eps(::Type{BFloat16sr}) = BFloat16sr(eps(Float16))
+Base.eps(x::BFloat16sr) = BFloat16sr(eps(Float16(x)))

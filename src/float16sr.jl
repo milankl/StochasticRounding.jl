@@ -139,3 +139,7 @@ function Base.bitstring(x::Float16sr,mode::Symbol)
         return bitstring(x)
     end
 end
+
+# BIGFLOAT
+Float16sr(x::BigFloat) = Float16sr(Float64(x))
+Base.decompose(x::Float16sr) = Base.decompose(Float16(x))

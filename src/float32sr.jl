@@ -82,8 +82,8 @@ end
 
 # Promotion
 Base.promote_rule(::Type{Float16}, ::Type{Float32sr}) = Float32
-Base.promote_rule(::Type{Float64}, ::Type{Float32sr}) = Float64
 Base.promote_rule(::Type{Float32}, ::Type{Float32sr}) = Float32
+Base.promote_rule(::Type{Float64}, ::Type{Float32sr}) = Float64
 
 for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128)
     @eval Base.promote_rule(::Type{Float32sr}, ::Type{$t}) = Float32sr
