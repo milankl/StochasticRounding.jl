@@ -80,7 +80,7 @@ function Float32_chance_roundup(x::Float64)
     return (x-xround_down)/(xround_up-xround_down)
 end
 
-# Promotion
+# Promotion, always to the deterministic format that contains both
 Base.promote_rule(::Type{Float16}, ::Type{Float32sr}) = Float32
 Base.promote_rule(::Type{Float32}, ::Type{Float32sr}) = Float32
 Base.promote_rule(::Type{Float64}, ::Type{Float32sr}) = Float64

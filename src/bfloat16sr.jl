@@ -117,6 +117,8 @@ for op in (:<, :<=, :isless)
     @eval Base.$op(a::BFloat16sr, b::BFloat16sr) = ($op)(Float32(a), Float32(b))
 end
 
+# Promotion, always to the deterministic format that contains both
+Base.promote_rule(::Type{Float16}, ::Type{BFloat16sr}) = Float32
 Base.promote_rule(::Type{Float32}, ::Type{BFloat16sr}) = Float32
 Base.promote_rule(::Type{Float64}, ::Type{BFloat16sr}) = Float64
 
