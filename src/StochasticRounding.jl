@@ -7,6 +7,8 @@ module StochasticRounding
         Float32sr,Float32_stochastic_round,             # Float32 + SR
         Float32_chance_roundup,NaN32sr,Inf32sr
 
+    import BFloat16s: BFloat16
+
     # faster random number generator
     import RandomNumbers.Xorshifts.Xoroshiro128Plus
     const Xor128 = Ref{Xoroshiro128Plus}(Xoroshiro128Plus())
@@ -25,6 +27,7 @@ module StochasticRounding
     include("bfloat16sr.jl")
     include("float16sr.jl")
     include("float32sr.jl")
-    include("promotion.jl")
 
+    include("promotion.jl")
+    include("conversions.jl")
 end
