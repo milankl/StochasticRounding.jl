@@ -1,3 +1,4 @@
+import BFloat16s.BFloat16
 """The Float32 + stochastic rounding type."""
 primitive type Float32sr <: AbstractFloat 32 end
 
@@ -52,6 +53,10 @@ Base.Float64(x::Float32sr) = Float64(Float32(x))
 
 Float32sr(x::Integer) = Float32sr(Float32(x))
 (::Type{T})(x::Float32sr) where {T<:Integer} = T(Float32(x))
+
+# converting to and from BFloat16
+Float32sr(x::BFloat16) = Float32sr(Float64(x))
+BFloat16(x::Float32sr) = BFloat16(Float32(x))
 
 const eps_F32 = prevfloat(Float64(nextfloat(zero(Float32))))
 const floatmin_F32 = Float64(floatmin(Float32))
