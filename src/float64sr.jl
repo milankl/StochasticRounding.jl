@@ -92,7 +92,7 @@ end
 for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,
              :atanh,:exp,:exp2,:exp10,:expm1,:log,:log2,:log10,:sqrt,:cbrt,:log1p)
     @eval begin
-        Base.$func(a::Float64sr) = Float64_stochastic_round($func(Float64(a)))
+        Base.$func(a::Float64sr) = Float64_stochastic_round($func(Double64(a)))
     end
 end
 
