@@ -121,19 +121,7 @@ for func in (:atan,:hypot)
     end
 end
 
-function Base.show(io::IO, x::Float16sr)
-    if isinf(x)
-        print(io, x < 0 ? "-Inf16" : "Inf16")
-    elseif isnan(x)
-        print(io, "NaN16")
-    else
-        io2 = IOBuffer()
-        print(io2,Float32(x))
-        f = String(take!(io2))
-        print(io,"Float16sr("*f*")")
-    end
-end
-
+Base.show(io::IO, x::Float16sr) = show(io,Float16(x))
 Base.bitstring(x::Float16sr) = bitstring(reinterpret(UInt16,x))
 
 function Base.bitstring(x::Float16sr,mode::Symbol)
