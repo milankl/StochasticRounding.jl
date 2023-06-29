@@ -11,7 +11,10 @@ like their deterministic counterparts but with stochastic rounding that is propo
 distance of the next representable numbers and therefore
 [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding)
 (see also example below in "Usage"). The only known hardware implementation available are
-[Graphcore's IPUs with stochastic rounding](https://www.graphcore.ai/products/ipu). 
+[Graphcore's IPUs with stochastic rounding](https://www.graphcore.ai/products/ipu),
+but other vendors are likely working on stochastic rounding for their next-generation
+GPUs (and maybe CPUs too).
+
 The software emulation of stochastic rounding in StochasticRounding.jl makes the number format
 slower, but e.g. Float32+stochastic rounding is only about 2x slower than Float64. 
 [Xoroshiro128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), 
@@ -24,7 +27,12 @@ ask questions or suggest any changes or new features.
 `BFloat16sr` is based on [BFloat16s.jl](https://github.com/JuliaMath/BFloat16s.jl)   
 `Float16sr` is slow in Julia <1.6, but fast in Julia >=1.6 due to LLVM's `half` support.
 
-### Usage
+## Usage
+
+`Float32sr`, `Float16sr` and `BFloat16sr` are supposed to be drop-in replacements for their
+deterministically rounded counterparts. You can create data of those types as expected
+(which is bitwise identical to the deterministic formats respectively) and the type
+will trigger stochastic rounding on every arithmetic operation.
 
 ```julia
 julia> a = BFloat16sr(1.0)
@@ -46,7 +54,7 @@ the random number generator at any time with any integer larger than zero as fol
 julia> StochasticRounding.seed(2156712)
 ```
 
-### Theory
+## Theory
 
 Round-to-nearest (tie to even) is the standard rounding mode for IEEE floats.
 Stochastic rounding is explained in the following schematic
@@ -58,18 +66,14 @@ is always rounded down to x₂ for round-to-nearest.
 For stochastic rounding, only at 80% chance x is round down.
 At 20% chance it is round up to x₃, proportional to the distance of x between x₂ and x₃.
 
-### Subnormals
-
-From v0.6 onwards all subnormals of Float32, Float16, BFloat16 are also stochastically rounded.
-
-### Installation
+## Installation
 StochasticRounding.jl is registered in the Julia registry. Hence, simply do
 ```julia
 julia>] add StochasticRounding
 ```
 where `]` opens the package manager.
 
-### Performance
+## Performance
 
 StochasticRounding.jl is among the fastest software implementation of stochastic rounding for floating-point arithmetic.
 Define a few random 1000000-element arrays
@@ -90,7 +94,7 @@ Stochastic rounding imposes an about x5 performance decrease for Float32 and BFl
 For more complicated benchmarks the performance decrease is usually within x10.
 About 50% of the time is spend on the random number generation with Xoroshiro128+.
 
-### Citation
+## Citation
 
 If you use this package please cite us
 
