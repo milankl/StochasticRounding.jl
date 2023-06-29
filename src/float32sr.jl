@@ -22,13 +22,10 @@ Base.floatmin(::Type{Float32sr}) = Float32sr(floatmin(Float32))
 Base.floatmax(::Type{Float32sr}) = Float32sr(floatmax(Float32))
 Base.maxintfloat(::Type{Float32sr}) = Float32sr(maxintfloat(Float32))
 
-
 Base.typemin(::Float32sr) = typemin(Float32sr)
 Base.typemax(::Float32sr) = typemax(Float32sr)
 Base.floatmin(::Float32sr) = floatmin(Float32sr)
 Base.floatmax(::Float32sr) = floatmax(Float32sr)
-
-
 
 Base.eps(::Type{Float32sr}) = Float32sr(eps(Float32))
 Base.eps(x::Float32sr) = Float32sr(eps(Float32(x)))
@@ -127,7 +124,7 @@ for func in (:atan,:hypot)
         Base.$func(a::Float32sr,b::Float32sr) = Float32_stochastic_round($func(Float64(a),Float64(b)))
     end
 end
-#sincos function
+
 function Base.sincos(x::Float32sr)
     s,c = sincos(Float64(x))
     return (Float32_stochastic_round(s),Float32_stochastic_round(c))
