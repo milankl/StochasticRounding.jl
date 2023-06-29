@@ -10,8 +10,9 @@ This package exports `Float32sr`,`Float16sr`, and `BFloat16sr`, three number for
 like their deterministic counterparts but with stochastic rounding that is proportional to the
 distance of the next representable numbers and therefore
 [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding)
-(see also example below in "Usage"). The only known hardware implementation available are
-[Graphcore's IPUs with stochastic rounding](https://www.graphcore.ai/products/ipu),
+(see also example below in [Usage](https://github.com/milankl/StochasticRounding.jl#usage).
+The only known hardware implementation available is
+[Graphcore's IPU with stochastic rounding](https://www.graphcore.ai/products/ipu),
 but other vendors are likely working on stochastic rounding for their next-generation
 GPUs (and maybe CPUs too).
 
@@ -46,6 +47,25 @@ As `1/3` is not exactly representable the rounding will be at 66.6% chance towar
 and at 33.3% towards 0.33203125 such that in expectation the result is 0.33333... and therefore exact. 
 You can use `BFloat16_chance_roundup(x::Float32)` to get the chance that `x` will be round up.
 
+Solving a linear equation system with LU decomposition and stochastic rounding:
+```julia
+A = Float32sr.(randn(3,3))
+b = Float32sr.(randn(3))
+```
+Now execute the `\` several times and the results will differ slightly due to stochastic rounding
+```julia
+julia> A\b
+3-element Vector{Float32sr}:
+  3.3321106f0
+  2.0391452f0
+ -0.59199476f0
+
+julia> A\b
+3-element Vector{Float32sr}:
+  3.3321111f0
+  2.0391457f0
+ -0.5919949f0
+```
 The random number generator is randomly seeded on every `import` or `using` such that running
 the same calculations twice, will not yield bit-reproducible results. However, you can seed
 the random number generator at any time with any integer larger than zero as follows
