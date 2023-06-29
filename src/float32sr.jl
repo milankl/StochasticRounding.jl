@@ -112,7 +112,7 @@ for f in (:+, :-, :*, :/, :^)
     @eval Base.$f(x::Float32sr, y::Float32sr) = Float32_stochastic_round($(f)(Float64(x), Float64(y)))
 end
 
-for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,
+for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,:sincos,
              :atanh,:exp,:exp2,:exp10,:expm1,:log,:log2,:log10,:sqrt,:cbrt,:log1p)
     @eval begin
         Base.$func(a::Float32sr) = Float32_stochastic_round($func(Float64(a)))
