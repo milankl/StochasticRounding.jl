@@ -16,6 +16,7 @@ Base.typemin(::Type{Float64sr}) = Float64sr(typemin(Float64))
 Base.typemax(::Type{Float64sr}) = Float64sr(typemax(Float64))
 Base.floatmin(::Type{Float64sr}) = Float64sr(floatmin(Float64))
 Base.floatmax(::Type{Float64sr}) = Float64sr(floatmax(Float64))
+Base.maxintfloat(::Type{Float64sr}) = Float64sr(maxintfloat(Float64))
 
 Base.typemin(::Float64sr) = typemin(Float64sr)
 Base.typemax(::Float64sr) = typemax(Float64sr)
@@ -46,6 +47,7 @@ Float64sr(x::Float16) = Float64sr(Float64(x))
 Float64sr(x::Float32) = Float64sr(Float64(x))
 Base.Float16(x::Float64sr) = Float16(Float64(x))
 Base.Float32(x::Float64sr) = Float32(Float64(x))
+Float64sr(x::Irrational) = Float64sr(Float64(x))
 
 DoubleFloats.Double64(x::Float64sr) = Double64(Float64(x))
 
@@ -85,7 +87,7 @@ for op in (:(==), :<, :<=, :isless)
 end
 
 # Arithmetic
-for f in (:+, :-, :*, :/, :^)
+for f in (:+, :-, :*, :/, :^, :mod)
     @eval Base.$f(x::Float64sr, y::Float64sr) = Float64_stochastic_round($(f)(Double64(x), Double64(y)))
 end
 
@@ -102,21 +104,7 @@ for func in (:atan,:hypot)
     end
 end
 
-
-# Showing
-function Base.show(io::IO, x::Float64sr)
-    if isinf(x)
-        print(io, x < 0 ? "-Infsr" : "Infsr")
-    elseif isnan(x)
-        print(io, "NaNsr")
-    else
-        io2 = IOBuffer()
-        print(io2,Float64(x))
-        f = String(take!(io2))
-        print(io,"Float64sr("*f*")")
-    end
-end
-
+Base.show(io::IO, x::Float64sr) = show(io,Float64(x))
 Base.bitstring(x::Float64sr) = bitstring(reinterpret(UInt64,x))
 
 function Base.bitstring(x::Float64sr,mode::Symbol)
