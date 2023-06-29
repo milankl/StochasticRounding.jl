@@ -181,8 +181,8 @@ end
 
 #BigFloat
 BFloat16sr(x::BigFloat) = BFloat16sr(Float64(x))
-Base.decompose(x::BFloat16sr) = Base.decompose(Float16(x))
+Base.decompose(x::BFloat16sr) = Base.decompose(BFloat16(x))
 
 #eps
-Base.eps(::Type{BFloat16sr}) = BFloat16sr(eps(Float16))
-Base.eps(x::BFloat16sr) = BFloat16sr(eps(Float16(x)))
+Base.eps(::Type{BFloat16sr}) = BFloat16sr(eps(BFloat16))
+Base.eps(x::BFloat16sr) = BFloat16sr(eps(BFloat16(x)))
