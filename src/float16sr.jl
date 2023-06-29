@@ -49,6 +49,9 @@ Float16sr(x::Float64) = Float16sr(Float32(x))
 Base.Float32(x::Float16sr) = Float32(Float16(x))
 Base.Float64(x::Float16sr) = Float64(Float16(x))
 
+#irrationals
+Float16sr(x::Irrational) = reinterpret(Float16sr,Float16(x))
+
 # converting to and from BFloat16
 Float16sr(x::BFloat16) = Float16sr(Float32(x))
 BFloat16(x::Float16sr) = BFloat16(Float16(x))
@@ -109,7 +112,7 @@ for f in (:+, :-, :*, :/, :^, :mod)
     @eval Base.$f(x::Float16sr, y::Float16sr) = Float16_stochastic_round($(f)(Float32(x), Float32(y)))
 end
 
-for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,:sincos,
+for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,
              :atanh,:exp,:exp2,:exp10,:expm1,:log,:log2,:log10,:sqrt,:cbrt,:log1p)
     @eval begin
         Base.$func(a::Float16sr) = Float16_stochastic_round($func(Float32(a)))
@@ -120,6 +123,12 @@ for func in (:atan,:hypot)
     @eval begin
         Base.$func(a::Float16sr,b::Float16sr) = Float16_stochastic_round($func(Float32(a),Float32(b)))
     end
+end
+
+#sincos function
+function Base.sincos(x::Float16sr)
+    s,c = sincos(Float32(x))
+    return (Float16_stochastic_round(s),Float16_stochastic_round(c))
 end
 
 function Base.show(io::IO, x::Float16sr)

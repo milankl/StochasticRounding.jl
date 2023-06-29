@@ -29,6 +29,7 @@ Base.floatmin(::Float32sr) = floatmin(Float32sr)
 Base.floatmax(::Float32sr) = floatmax(Float32sr)
 
 
+
 Base.eps(::Type{Float32sr}) = Float32sr(eps(Float32))
 Base.eps(x::Float32sr) = Float32sr(eps(Float32(x)))
 
@@ -53,6 +54,8 @@ Float32sr(x::Float16) = Float32sr(Float32(x))
 Float32sr(x::Float64) = Float32sr(Float32(x))
 Base.Float16(x::Float32sr) = Float16(Float32(x))
 Base.Float64(x::Float32sr) = Float64(Float32(x))
+#irrationals
+Float32sr(x::Irrational) = reinterpret(Float32sr,Float32(x))
 
 Float32sr(x::Integer) = Float32sr(Float32(x))
 (::Type{T})(x::Float32sr) where {T<:Integer} = T(Float32(x))
@@ -112,7 +115,7 @@ for f in (:+, :-, :*, :/, :^, :mod)
     @eval Base.$f(x::Float32sr, y::Float32sr) = Float32_stochastic_round($(f)(Float64(x), Float64(y)))
 end
 
-for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,:sincos,
+for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,
              :atanh,:exp,:exp2,:exp10,:expm1,:log,:log2,:log10,:sqrt,:cbrt,:log1p)
     @eval begin
         Base.$func(a::Float32sr) = Float32_stochastic_round($func(Float64(a)))
@@ -124,7 +127,11 @@ for func in (:atan,:hypot)
         Base.$func(a::Float32sr,b::Float32sr) = Float32_stochastic_round($func(Float64(a),Float64(b)))
     end
 end
-
+#sincos function
+function Base.sincos(x::Float32sr)
+    s,c = sincos(Float64(x))
+    return (Float32_stochastic_round(s),Float32_stochastic_round(c))
+end
 
 # Showing
 function Base.show(io::IO, x::Float32sr)
