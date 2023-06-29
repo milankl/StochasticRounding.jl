@@ -20,11 +20,14 @@ Base.typemin(::Type{Float32sr}) = Float32sr(typemin(Float32))
 Base.typemax(::Type{Float32sr}) = Float32sr(typemax(Float32))
 Base.floatmin(::Type{Float32sr}) = Float32sr(floatmin(Float32))
 Base.floatmax(::Type{Float32sr}) = Float32sr(floatmax(Float32))
+Base.maxintfloat(::Type{Float32sr}) = Float32sr(maxintfloat(Float32))
+
 
 Base.typemin(::Float32sr) = typemin(Float32sr)
 Base.typemax(::Float32sr) = typemax(Float32sr)
 Base.floatmin(::Float32sr) = floatmin(Float32sr)
 Base.floatmax(::Float32sr) = floatmax(Float32sr)
+
 
 Base.eps(::Type{Float32sr}) = Float32sr(eps(Float32))
 Base.eps(x::Float32sr) = Float32sr(eps(Float32(x)))
