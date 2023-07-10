@@ -63,9 +63,9 @@ stochastic rounding of Float32 -> Float16.
 This function samples uniformly from [-2.980232f-8,2.9802319f-8].
 This function is algorithmically similar to randfloat from RandomNumbers.jl"""
 function rand_subnormal(rbits::UInt32)
-    lz = leading_zeros(rbits)   # count leading zeros for
+    lz = leading_zeros(rbits)   # count leading zeros for correct probabilities of exponent
     e = ((101 - lz) % UInt32) << 23
-    e |= (rbits << 31)         # use last bit for sign
+    e |= (rbits << 31)          # use last bit for sign
     
     # combine exponent with random mantissa
     return reinterpret(Float32,e | (rbits & 0x007f_ffff))
