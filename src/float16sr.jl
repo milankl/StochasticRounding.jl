@@ -59,26 +59,55 @@ BFloat16(x::Float16sr) = BFloat16(Float16(x))
 Float16sr(x::Integer) = Float16sr(Float32(x))
 (::Type{T})(x::Float16sr) where {T<:Integer} = T(Float32(x))
 
-const eps_F16 = prevfloat(Float32(nextfloat(zero(Float16))))
+"""
+    rand_subnormal(rbits::UInt32) -> Float32
+
+Create a random perturbation for the Float16 subnormals for
+stochastic rounding of Float32 -> Float16.
+This function samples uniformly from [-2.980232f-8,2.9802319f-8].
+This function is algorithmically similar to randfloat from RandomNumbers.jl"""
+function rand_subnormal(rbits::UInt32)
+    lz = leading_zeros(rbits)   # count leading zeros for correct probabilities of exponent
+    e = ((101 - lz) % UInt32) << 23
+    e |= (rbits << 31)          # use last bit for sign
+    
+    # combine exponent with random mantissa
+    return reinterpret(Float32,e | (rbits & 0x007f_ffff))
+end
+
+const eps_F16 = prevfloat(Float32(nextfloat(zero(Float16))),1)
 const floatmin_F16 = Float32(floatmin(Float16))
 const oneF32 = reinterpret(Int32,one(Float32))
 
-"""Stochastically round x::Float32 to Float16 with distance-proportional probabilities."""
+# # old version 
+# function rand_subnormal(rbits::UInt32)
+#     return eps_F16*(reinterpret(Float32,oneF32 | (rbits >> 9))-1.5f0)
+# end
+
+"""
+    Float16_stochastic_round(x::Float32) -> Float16sr
+
+Stochastically round `x` to Float16 with distance-proportional probabilities."""
 function Float16_stochastic_round(x::Float32)
     rbits = rand(Xor128[],UInt32)   # create random bits
 
     # subnormals are rounded with float-arithmetic for uniform stoch perturbation
-    abs(x) < floatmin_F16 && return Float16sr(x+eps_F16*(reinterpret(Float32,oneF32 | (rand(Xor128[],UInt32) >> 9))-1.5f0))
-
+    abs(x) < floatmin_F16 && return Float16sr(x+rand_subnormal(rbits))
+    
+    # normals are stochastically rounded with integer arithmetic
     ui = reinterpret(UInt32,x)
-    ui += (rbits & 0x0000_1fff)     # add perturbation in [0,u)
-    ui &= 0xffff_e000               # round to zero
+    mask = 0x0000_1fff          # only mantissa bit 11-23 (the non-Float16 ones)
+    ui += (rbits & mask)        # add perturbation in [0,u)
+    ui &= ~mask                 # round to zero
 
-    # convert to Float16 to adjust exponent bits
-    return reinterpret(Float16sr,Float16(reinterpret(Float32,ui)))  
+    # via conversion to Float16 to adjust exponent bits
+    return Float16sr(reinterpret(Float32,ui))
 end
 
-"""Chance that x::Float32 is round up when converted to Float16sr."""
+"""
+    Float16_chance_roundup(x::Float32)
+
+Chance that x::Float32 is round up when converted to Float16sr."""
 function Float16_chance_roundup(x::Float32)
     xround = Float32(Float16(x))
     xround == x && return zero(Float32)
@@ -131,19 +160,7 @@ function Base.sincos(x::Float16sr)
     return (Float16_stochastic_round(s),Float16_stochastic_round(c))
 end
 
-function Base.show(io::IO, x::Float16sr)
-    if isinf(x)
-        print(io, x < 0 ? "-Inf16" : "Inf16")
-    elseif isnan(x)
-        print(io, "NaN16")
-    else
-        io2 = IOBuffer()
-        print(io2,Float32(x))
-        f = String(take!(io2))
-        print(io,"Float16sr("*f*")")
-    end
-end
-
+Base.show(io::IO, x::Float16sr) = show(io,Float16(x))
 Base.bitstring(x::Float16sr) = bitstring(reinterpret(UInt16,x))
 
 function Base.bitstring(x::Float16sr,mode::Symbol)

@@ -129,20 +129,7 @@ for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt
     @eval Base.promote_rule(::Type{BFloat16sr}, ::Type{$t}) = BFloat16sr
 end
 
-# Showing
-function Base.show(io::IO, x::BFloat16sr)
-    if isinf(x)
-        print(io, x < 0 ? "-InfB16" : "InfB16")
-    elseif isnan(x)
-        print(io, "NaNB16")
-    else
-        io2 = IOBuffer()
-        print(io2,Float32(x))
-        f = String(take!(io2))
-        print(io,"BFloat16sr("*f*")")
-    end
-end
-
+Base.show(io::IO, x::BFloat16sr) = show(io,BFloat16(x))
 Base.bitstring(x::BFloat16sr) = bitstring(reinterpret(UInt16,x))
 
 function Base.bitstring(x::BFloat16sr,mode::Symbol)
