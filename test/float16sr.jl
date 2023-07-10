@@ -182,3 +182,36 @@ end
         @test isapprox(Nup/N,p,atol=2e-2)
     end
 end
+
+# USED TO TEST SOME SUBNORMALS MANUALLY
+# const ϵ = prevfloat(Float32(nextfloat(zero(Float16))),1)
+
+# function g(x::Float32,r::Float32)
+#     # x + ϵ*(r-1.5f0)
+#     x + randfloat(reinterpret(UInt32,r))
+# end
+
+# function randfloat(ui::UInt32)
+
+#     lz = leading_zeros(ui)
+#     e = ((101 - lz) % UInt32) << 23
+#     e |= (ui << 31)
+
+#     # combine exponent and significand
+#     return reinterpret(Float32,e | (ui & 0x007f_ffff))
+# end
+
+
+# function h(x::Float32)
+#     # deterministically rounded correct value in uint16
+#     c = Int(reinterpret(UInt16,Float16(x)))
+
+#     v = zeros(Int16,2^23)
+#     r = 1f0
+
+#     for i in 0:2^23-1
+#         v[i+1] = Int(reinterpret(UInt16,Float16(g(x,r)))) - c
+#         r = nextfloat(r)
+#     end
+#     return v
+# end
