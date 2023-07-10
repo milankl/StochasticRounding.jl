@@ -151,21 +151,7 @@ for func in (:atan,:hypot)
     end
 end
 
-
-# Showing
-function Base.show(io::IO, x::Float32sr)
-    if isinf(x)
-        print(io, x < 0 ? "-Inf32sr" : "Inf32sr")
-    elseif isnan(x)
-        print(io, "NaN32sr")
-    else
-        io2 = IOBuffer()
-        print(io2,Float32(x))
-        f = String(take!(io2))
-        print(io,"Float32sr("*f*")")
-    end
-end
-
+Base.show(io::IO, x::Float32sr) = show(io,Float32(x))
 Base.bitstring(x::Float32sr) = bitstring(reinterpret(UInt32,x))
 
 function Base.bitstring(x::Float32sr,mode::Symbol)
