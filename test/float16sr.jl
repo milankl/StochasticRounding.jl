@@ -47,7 +47,7 @@ end
     @test o == prevfloat(nextfloat(o))
 end
 
-@testset "Odd floats are never round away" begin
+@testset "Odd floats are never rounded away" begin
     # chances are 2^-29 = 2e-9
     # so technically one should use N = 100_000_000
     N = 100_000 
@@ -77,7 +77,11 @@ function test_chances_round(f32::Float32;N::Int=100_000)
     p = Float16_chance_roundup(f32)
 
     f16_round = Float16sr(f32)
-    if Float32(f16_round) <= f32
+
+    if Float32(f16_round) == f32
+        f16_roundup=f16_round
+        f16_rounddown=f16_round
+    elseif Float32(f16_round) < f32
         f16_rounddown = f16_round
         f16_roundup = nextfloat(f16_round)
     else
@@ -101,19 +105,27 @@ end
 
 @testset "Test for N(0,1)" begin
     for x in randn(Float32,10_000)
-        Ndown,Nup,N,p = test_chances_round(x)
-        @test Ndown + Nup == N
-        @test isapprox(Ndown/N,1-p,atol=2e-2)
-        @test isapprox(Nup/N,p,atol=2e-2)
+        # exclude subnormals from testing, they are tested further down
+        if ~issubnormal(Float16(x))
+            Ndown,Nup,N,p = test_chances_round(x)
+            @test Ndown + Nup == N
+            Ndown + Nup != N && @info "Test failed for $x, $(bitstring(Float16(x)))"
+            @test isapprox(Ndown/N,1-p,atol=2e-2)
+            @test isapprox(Nup/N,p,atol=2e-2)
+        end
     end
 end
 
 @testset "Test for U(0,1)" begin
     for x in rand(Float32,10_000)
-        Ndown,Nup,N,p = test_chances_round(x)
-        @test Ndown + Nup == N
-        @test isapprox(Ndown/N,1-p,atol=2e-2)
-        @test isapprox(Nup/N,p,atol=2e-2)
+        # exclude subnormals from testing, they are tested further down
+        if ~issubnormal(Float16(x))
+            Ndown,Nup,N,p = test_chances_round(x)
+            @test Ndown + Nup == N
+            Ndown + Nup != N && @info "Test failed for $x, $(bitstring(Float16(x)))"
+            @test isapprox(Ndown/N,1-p,atol=2e-2)
+            @test isapprox(Nup/N,p,atol=2e-2)
+        end
     end
 end
 
@@ -157,6 +169,7 @@ end
     for x in subnormals
         Ndown,Nup,N,p = test_chances_round(x)
         @test Ndown + Nup == N
+        Ndown + Nup != N && @info "Test failed for $x, $(bitstring(Float16(x)))"
         @test isapprox(Ndown/N,1-p,atol=2e-2)
         @test isapprox(Nup/N,p,atol=2e-2)
     end
@@ -164,8 +177,8 @@ end
     for x in -subnormals
         Ndown,Nup,N,p = test_chances_round(x)
         @test Ndown + Nup == N
+        Ndown + Nup != N && @info "Test failed for $x, $(bitstring(Float16(x)))"
         @test isapprox(Ndown/N,1-p,atol=2e-2)
         @test isapprox(Nup/N,p,atol=2e-2)
     end
 end
-
