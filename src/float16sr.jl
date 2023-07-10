@@ -17,6 +17,7 @@ Base.typemin(::Type{Float16sr}) = Float16sr(typemin(Float16))
 Base.typemax(::Type{Float16sr}) = Float16sr(typemax(Float16))
 Base.floatmin(::Type{Float16sr}) = Float16sr(floatmin(Float16))
 Base.floatmax(::Type{Float16sr}) = Float16sr(floatmax(Float16))
+Base.maxintfloat(::Type{Float16sr}) = Float16sr(maxintfloat(Float16))
 
 Base.typemin(::Float16sr) = typemin(Float16sr)
 Base.typemax(::Float16sr) = typemax(Float16sr)
@@ -47,6 +48,9 @@ Float16sr(x::Float32) = Float16sr(Float16(x))
 Float16sr(x::Float64) = Float16sr(Float32(x))
 Base.Float32(x::Float16sr) = Float32(Float16(x))
 Base.Float64(x::Float16sr) = Float64(Float16(x))
+
+#irrationals
+Float16sr(x::Irrational) = reinterpret(Float16sr,Float16(x))
 
 # converting to and from BFloat16
 Float16sr(x::BFloat16) = Float16sr(Float32(x))
@@ -133,7 +137,7 @@ for op in (:(==), :<, :<=, :isless)
 end
 
 # Arithmetic
-for f in (:+, :-, :*, :/, :^)
+for f in (:+, :-, :*, :/, :^, :mod)
     @eval Base.$f(x::Float16sr, y::Float16sr) = Float16_stochastic_round($(f)(Float32(x), Float32(y)))
 end
 
@@ -148,6 +152,12 @@ for func in (:atan,:hypot)
     @eval begin
         Base.$func(a::Float16sr,b::Float16sr) = Float16_stochastic_round($func(Float32(a),Float32(b)))
     end
+end
+
+#sincos function
+function Base.sincos(x::Float16sr)
+    s,c = sincos(Float32(x))
+    return (Float16_stochastic_round(s),Float16_stochastic_round(c))
 end
 
 Base.show(io::IO, x::Float16sr) = show(io,Float16(x))
