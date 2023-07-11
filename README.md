@@ -89,3 +89,9 @@ And similarly for the other number types. Then with Julia 1.6 on an Intel(R) Cor
 Stochastic rounding imposes an about x5 performance decrease for Float32 and BFloat16, but only x2 for Float16.
 For more complicated benchmarks the performance decrease is usually within x10.
 About 50% of the time is spend on the random number generation with Xoroshiro128+.
+
+### Citation
+
+If you use this package please cite us
+
+> Paxton EA, M Chantry, M Klöwer, L Saffin, TN Palmer, 2022. Climate Modelling in Low-Precision: Effects of both Deterministic & Stochastic Rounding, Journal of Climate, [10.1175/JCLI-D-21-0343.1](https://doi.org/10.1175/JCLI-D-21-0343.1)

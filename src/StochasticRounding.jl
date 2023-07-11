@@ -31,5 +31,6 @@ module StochasticRounding
     include("float16sr.jl")
     include("float32sr.jl")
     include("float64sr.jl")
+    include("conversions.jl")
 
 end

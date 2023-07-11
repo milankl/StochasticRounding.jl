@@ -1,5 +1,3 @@
-import BFloat16s.BFloat16
-
 """The BFloat16 + stochastic rounding type."""
 primitive type BFloat16sr <: AbstractFloat 16 end
 

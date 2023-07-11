@@ -16,6 +16,7 @@ Base.typemin(::Type{Float64sr}) = Float64sr(typemin(Float64))
 Base.typemax(::Type{Float64sr}) = Float64sr(typemax(Float64))
 Base.floatmin(::Type{Float64sr}) = Float64sr(floatmin(Float64))
 Base.floatmax(::Type{Float64sr}) = Float64sr(floatmax(Float64))
+Base.maxintfloat(::Type{Float64sr}) = Float64sr(maxintfloat(Float64))
 
 Base.typemin(::Float64sr) = typemin(Float64sr)
 Base.typemax(::Float64sr) = typemax(Float64sr)
@@ -46,6 +47,7 @@ Float64sr(x::Float16) = Float64sr(Float64(x))
 Float64sr(x::Float32) = Float64sr(Float64(x))
 Base.Float16(x::Float64sr) = Float16(Float64(x))
 Base.Float32(x::Float64sr) = Float32(Float64(x))
+Float64sr(x::Irrational) = Float64sr(Float64(x))
 
 DoubleFloats.Double64(x::Float64sr) = Double64(Float64(x))
 Float64sr(x::Double64) = Float64sr(Float64(x))
@@ -95,14 +97,14 @@ for op in (:(==), :<, :<=, :isless)
 end
 
 # Arithmetic
-for f in (:+, :-, :*, :/, :^)
+for f in (:+, :-, :*, :/, :^, :mod)
     @eval Base.$f(x::Float64sr, y::Float64sr) = Float64_stochastic_round($(f)(Double64(x), Double64(y)))
 end
 
 for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,
              :atanh,:exp,:exp2,:exp10,:expm1,:log,:log2,:log10,:sqrt,:cbrt,:log1p)
     @eval begin
-        Base.$func(a::Float64sr) = Float64_stochastic_round($func(Float64(a)))
+        Base.$func(a::Float64sr) = Float64_stochastic_round($func(Double64(a)))
     end
 end
 
