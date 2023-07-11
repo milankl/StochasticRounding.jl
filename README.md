@@ -6,7 +6,7 @@
 [![CI](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml)   
 Stochastic rounding for floating-point arithmetic.
 
-This package exports `Float64sr`, Float32sr`,`Float16sr`, and `BFloat16sr`, three number formats that behave
+This package exports `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr`, three number formats that behave
 like their deterministic counterparts but with stochastic rounding that is proportional to the
 distance of the next representable numbers and therefore
 [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding)
