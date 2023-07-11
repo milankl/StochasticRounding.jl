@@ -6,7 +6,7 @@
 [![CI](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml)   
 Stochastic rounding for floating-point arithmetic.
 
-This package exports `Float32sr`,`Float16sr`, and `BFloat16sr`, three number formats that behave
+This package exports `Float64sr`, Float32sr`,`Float16sr`, and `BFloat16sr`, three number formats that behave
 like their deterministic counterparts but with stochastic rounding that is proportional to the
 distance of the next representable numbers and therefore
 [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding)
@@ -17,6 +17,12 @@ slower, but e.g. Float32+stochastic rounding is only about 2x slower than Float6
 [Xoroshiro128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), 
 a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the 
 [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package, due to its speed and statistical properties.
+
+Ever format of `Float64sr`, Float32sr`,`Float16sr`, and `BFloat16sr` uses a higher precision format
+to obtain the "exact" arithmetic result which is then stochastically rounded to the respective
+lower precision format. `Float16sr` and `BFloat16sr` use `Float32` for this,
+`Float32sr` uses `Float64`, and `Float64sr` uses `Double64` from
+[DoubleFloats.jl](https://github.com/JuliaMath/DoubleFloats.jl)
 
 You are welcome to raise [issues](https://github.com/milankl/StochasticRounding.jl/issues),
 ask questions or suggest any changes or new features.
