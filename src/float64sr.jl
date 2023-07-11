@@ -48,6 +48,7 @@ Base.Float16(x::Float64sr) = Float16(Float64(x))
 Base.Float32(x::Float64sr) = Float32(Float64(x))
 
 DoubleFloats.Double64(x::Float64sr) = Double64(Float64(x))
+Float64sr(x::Double64) = Float64sr(Float64(x))
 
 Float64sr(x::Integer) = Float64sr(Float64(x))
 (::Type{T})(x::Float64sr) where {T<:Integer} = T(Float64(x))
@@ -63,6 +64,15 @@ function Float64_stochastic_round(x::Double64)
     u = eps(a)  # = ulp
 
     return Float64sr(a + (b+u*r))    # (b+u*r) first as a+b would be rounded to a
+end
+
+function Float64_chance_roundup(x::Real)
+    xround = Float64(x)
+    xround == x && return zero(Float64)
+    xround_down, xround_up = xround < x ? (xround,nextfloat(xround)) :
+        (prevfloat(xround),xround)
+    
+    return Float64((x-xround_down)/(xround_up-xround_down))
 end
 
 Base.promote_rule(::Type{Float16}, ::Type{Float64sr}) = Float64sr
@@ -104,20 +114,8 @@ end
 
 
 # Showing
-function Base.show(io::IO, x::Float64sr)
-    if isinf(x)
-        print(io, x < 0 ? "-Infsr" : "Infsr")
-    elseif isnan(x)
-        print(io, "NaNsr")
-    else
-        io2 = IOBuffer()
-        print(io2,Float64(x))
-        f = String(take!(io2))
-        print(io,"Float64sr("*f*")")
-    end
-end
-
-Base.bitstring(x::Float64sr) = bitstring(reinterpret(UInt64,x))
+Base.show(io::IO, x::Float64sr) = show(io,Float64(x))
+Base.bitstring(x::Float64sr) = bitstring(reinterpret(Float64,x))
 
 function Base.bitstring(x::Float64sr,mode::Symbol)
     if mode == :split	# split into sign, exponent, signficand

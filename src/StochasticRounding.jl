@@ -7,8 +7,8 @@ module StochasticRounding
         Float32sr,Float32_stochastic_round,             # Float32 + SR
         Float32_chance_roundup,NaN32sr,Inf32sr,
         Float64sr,Float64_stochastic_round,             # Float64 + SR
+        Float64_chance_roundup,
         NaNsr,Infsr
-
 
     # faster random number generator
     import RandomNumbers.Xorshifts.Xoroshiro128Plus
