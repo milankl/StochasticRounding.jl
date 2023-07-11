@@ -22,7 +22,7 @@ slower, but e.g. Float32+stochastic rounding is only about 2x slower than Float6
 a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the 
 [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package, due to its speed and statistical properties.
 
-Ever format of `Float64sr`, Float32sr`,`Float16sr`, and `BFloat16sr` uses a higher precision format
+Ever format of `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr` uses a higher precision format
 to obtain the "exact" arithmetic result which is then stochastically rounded to the respective
 lower precision format. `Float16sr` and `BFloat16sr` use `Float32` for this,
 `Float32sr` uses `Float64`, and `Float64sr` uses `Double64` from
