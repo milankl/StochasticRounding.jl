@@ -21,6 +21,7 @@ Base.typemax(::Type{BFloat16sr}) = InfB16sr
 Base.floatmin(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x0080)
 Base.floatmax(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x7f7f)
 minpos(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x0001)
+Base.maxintfloat(::Type{BFloat16sr}) = BFloat16sr(maxintfloat(BFloat16))
 
 Base.typemin(::BFloat16sr) = typemin(BFloat16sr)
 Base.typemax(::BFloat16sr) = typemax(BFloat16sr)
@@ -48,6 +49,7 @@ BFloat16sr(x::Integer) = BFloat16sr(Float32(x))
 
 Base.Float64(x::BFloat16sr) = Float64(Float32(x))
 Base.Float16(x::BFloat16sr) = Float16(Float32(x))
+BFloat16sr(x::Irrational) = reinterpret(BFloat16sr,BFloat16(x))
 
 # conversion between BFloat16 and BFloat16sr
 BFloat16(x::BFloat16sr) = reinterpret(BFloat16,x)
@@ -83,7 +85,7 @@ function BFloat16_chance_roundup(x::Float32)
 end
 
 # Basic arithmetic
-for f in (:+, :-, :*, :/, :^)
+for f in (:+, :-, :*, :/, :^, :mod)
     @eval Base.$f(x::BFloat16sr, y::BFloat16sr) = BFloat16_stochastic_round($(f)(Float32(x), Float32(y)))
 end
 
@@ -98,6 +100,11 @@ for func in (:sin,:cos,:tan,:asin,:acos,:atan,:sinh,:cosh,:tanh,:asinh,:acosh,
     @eval begin
         Base.$func(a::BFloat16sr) = BFloat16_stochastic_round($func(Float32(a)))
     end
+end
+
+function Base.sincos(x::BFloat16sr)
+    s,c = sincos(Float32(x))
+    return (BFloat16_stochastic_round(s),BFloat16_stochastic_round(c))
 end
 
 for func in (:atan,:hypot)
@@ -124,20 +131,7 @@ for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt
     @eval Base.promote_rule(::Type{BFloat16sr}, ::Type{$t}) = BFloat16sr
 end
 
-# Showing
-function Base.show(io::IO, x::BFloat16sr)
-    if isinf(x)
-        print(io, x < 0 ? "-InfB16" : "InfB16")
-    elseif isnan(x)
-        print(io, "NaNB16")
-    else
-        io2 = IOBuffer()
-        print(io2,Float32(x))
-        f = String(take!(io2))
-        print(io,"BFloat16sr("*f*")")
-    end
-end
-
+Base.show(io::IO, x::BFloat16sr) = show(io,BFloat16(x))
 Base.bitstring(x::BFloat16sr) = bitstring(reinterpret(UInt16,x))
 
 function Base.bitstring(x::BFloat16sr,mode::Symbol)

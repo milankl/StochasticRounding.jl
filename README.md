@@ -6,17 +6,27 @@
 [![CI](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml)   
 Stochastic rounding for floating-point arithmetic.
 
-This package exports `Float32sr`,`Float16sr`, and `BFloat16sr`, three number formats that behave
+This package exports `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr`, three number formats that behave
 like their deterministic counterparts but with stochastic rounding that is proportional to the
 distance of the next representable numbers and therefore
 [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding)
-(see also example below in "Usage"). The only known hardware implementation available are
-[Graphcore's IPUs with stochastic rounding](https://www.graphcore.ai/products/ipu). 
+(see also example below in [Usage](https://github.com/milankl/StochasticRounding.jl#usage).
+The only known hardware implementation available is
+[Graphcore's IPU with stochastic rounding](https://www.graphcore.ai/products/ipu),
+but other vendors are likely working on stochastic rounding for their next-generation
+GPUs (and maybe CPUs too).
+
 The software emulation of stochastic rounding in StochasticRounding.jl makes the number format
 slower, but e.g. Float32+stochastic rounding is only about 2x slower than Float64. 
 [Xoroshiro128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), 
 a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the 
 [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package, due to its speed and statistical properties.
+
+Ever format of `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr` uses a higher precision format
+to obtain the "exact" arithmetic result which is then stochastically rounded to the respective
+lower precision format. `Float16sr` and `BFloat16sr` use `Float32` for this,
+`Float32sr` uses `Float64`, and `Float64sr` uses `Double64` from
+[DoubleFloats.jl](https://github.com/JuliaMath/DoubleFloats.jl)
 
 You are welcome to raise [issues](https://github.com/milankl/StochasticRounding.jl/issues),
 ask questions or suggest any changes or new features.
@@ -24,7 +34,12 @@ ask questions or suggest any changes or new features.
 `BFloat16sr` is based on [BFloat16s.jl](https://github.com/JuliaMath/BFloat16s.jl)   
 `Float16sr` is slow in Julia <1.6, but fast in Julia >=1.6 due to LLVM's `half` support.
 
-### Usage
+## Usage
+
+`Float64sr`, `Float32sr`, `Float16sr` and `BFloat16sr` are supposed to be drop-in replacements for their
+deterministically rounded counterparts. You can create data of those types as expected
+(which is bitwise identical to the deterministic formats respectively) and the type
+will trigger stochastic rounding on every arithmetic operation.
 
 ```julia
 julia> a = BFloat16sr(1.0)
@@ -38,6 +53,25 @@ As `1/3` is not exactly representable the rounding will be at 66.6% chance towar
 and at 33.3% towards 0.33203125 such that in expectation the result is 0.33333... and therefore exact. 
 You can use `BFloat16_chance_roundup(x::Float32)` to get the chance that `x` will be round up.
 
+Solving a linear equation system with LU decomposition and stochastic rounding:
+```julia
+A = Float32sr.(randn(3,3))
+b = Float32sr.(randn(3))
+```
+Now execute the `\` several times and the results will differ slightly due to stochastic rounding
+```julia
+julia> A\b
+3-element Vector{Float32sr}:
+  3.3321106f0
+  2.0391452f0
+ -0.59199476f0
+
+julia> A\b
+3-element Vector{Float32sr}:
+  3.3321111f0
+  2.0391457f0
+ -0.5919949f0
+```
 The random number generator is randomly seeded on every `import` or `using` such that running
 the same calculations twice, will not yield bit-reproducible results. However, you can seed
 the random number generator at any time with any integer larger than zero as follows
@@ -46,7 +80,7 @@ the random number generator at any time with any integer larger than zero as fol
 julia> StochasticRounding.seed(2156712)
 ```
 
-### Theory
+## Theory
 
 Round-to-nearest (tie to even) is the standard rounding mode for IEEE floats.
 Stochastic rounding is explained in the following schematic
@@ -58,18 +92,14 @@ is always rounded down to x₂ for round-to-nearest.
 For stochastic rounding, only at 80% chance x is round down.
 At 20% chance it is round up to x₃, proportional to the distance of x between x₂ and x₃.
 
-### Subnormals
-
-From v0.6 onwards all subnormals of Float32, Float16, BFloat16 are also stochastically rounded.
-
-### Installation
+## Installation
 StochasticRounding.jl is registered in the Julia registry. Hence, simply do
 ```julia
 julia>] add StochasticRounding
 ```
 where `]` opens the package manager.
 
-### Performance
+## Performance
 
 StochasticRounding.jl is among the fastest software implementation of stochastic rounding for floating-point arithmetic.
 Define a few random 1000000-element arrays
@@ -84,8 +114,15 @@ And similarly for the other number types. Then with Julia 1.6 on an Intel(R) Cor
 | rounding mode         | Float64    | Float32    | Float16   | BFloat16    |
 | --------------------- | ---------- | ---------- | --------- | ----------- |
 | round to nearest      | 1132 μs    |  452 μs    | 1588 μs   |  315 μs     |
-| stochastic rounding   | n/a        | 2650 μs    | 3310 μs   | 1850 μs     |
+| stochastic rounding   | 11,368 μs  | 2650 μs    | 3310 μs   | 1850 μs     |
 
-Stochastic rounding imposes an about x5 performance decrease for Float32 and BFloat16, but only x2 for Float16.
+Stochastic rounding imposes an about x5 performance decrease for Float32 and BFloat16, but only x2 for Float16,
+however, 10x for Float64 due to the use of Double64.
 For more complicated benchmarks the performance decrease is usually within x10.
 About 50% of the time is spend on the random number generation with Xoroshiro128+.
+
+## Citation
+
+If you use this package please cite us
+
+> Paxton EA, M Chantry, M Klöwer, L Saffin, TN Palmer, 2022. Climate Modelling in Low-Precision: Effects of both Deterministic & Stochastic Rounding, Journal of Climate, [10.1175/JCLI-D-21-0343.1](https://doi.org/10.1175/JCLI-D-21-0343.1)

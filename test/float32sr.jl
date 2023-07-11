@@ -112,7 +112,10 @@ function test_chances_round(f64::Float64;N::Int=100_000)
     p = Float32_chance_roundup(f64)
 
     f32_round = Float32sr(f64)
-    if Float64(f32_round) <= f64
+    if Float64(f32_round) == f64
+        f32_roundup = f32_round
+        f32_rounddown = f32_round
+    elseif Float64(f32_round) < f64
         f32_rounddown = f32_round
         f32_roundup = nextfloat(f32_round)
     else
@@ -173,7 +176,7 @@ end
     floatminF32 = reinterpret(UInt64,Float64(floatmin(Float32)))
     minposF32 = reinterpret(UInt64,Float64(nextfloat(zero(Float32))))
 
-    N = 100
+    N = 5000
     subnormals = reinterpret.(Float64,rand(minposF32:floatminF32,N))
     for x in subnormals
         @test test_chances_round(x)
