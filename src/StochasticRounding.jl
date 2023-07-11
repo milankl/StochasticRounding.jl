@@ -10,6 +10,9 @@ module StochasticRounding
         Float64_chance_roundup,
         NaNsr,Infsr
 
+    # use BFloat16 from BFloat16s.jl
+    import BFloat16s: BFloat16
+
     # faster random number generator
     import RandomNumbers.Xorshifts.Xoroshiro128Plus
     const Xor128 = Ref{Xoroshiro128Plus}(Xoroshiro128Plus())
