@@ -84,9 +84,10 @@ And similarly for the other number types. Then with Julia 1.6 on an Intel(R) Cor
 | rounding mode         | Float64    | Float32    | Float16   | BFloat16    |
 | --------------------- | ---------- | ---------- | --------- | ----------- |
 | round to nearest      | 1132 μs    |  452 μs    | 1588 μs   |  315 μs     |
-| stochastic rounding   | n/a        | 2650 μs    | 3310 μs   | 1850 μs     |
+| stochastic rounding   | 11,368 μs  | 2650 μs    | 3310 μs   | 1850 μs     |
 
-Stochastic rounding imposes an about x5 performance decrease for Float32 and BFloat16, but only x2 for Float16.
+Stochastic rounding imposes an about x5 performance decrease for Float32 and BFloat16, but only x2 for Float16,
+however, 10x for Float64 due to the use of Double64.
 For more complicated benchmarks the performance decrease is usually within x10.
 About 50% of the time is spend on the random number generation with Xoroshiro128+.
 
