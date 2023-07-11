@@ -36,7 +36,7 @@ ask questions or suggest any changes or new features.
 
 ## Usage
 
-`Float32sr`, `Float16sr` and `BFloat16sr` are supposed to be drop-in replacements for their
+`Float64sr`, `Float32sr`, `Float16sr` and `BFloat16sr` are supposed to be drop-in replacements for their
 deterministically rounded counterparts. You can create data of those types as expected
 (which is bitwise identical to the deterministic formats respectively) and the type
 will trigger stochastic rounding on every arithmetic operation.
