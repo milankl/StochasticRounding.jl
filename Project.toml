@@ -9,7 +9,7 @@ DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 RandomNumbers = "e6cf234a-135c-5ec9-84dd-332b85af5143"
 
 [compat]
-BFloat16s = "0.1, 0.2"
+BFloat16s = "0.1, 0.2, 0.3, 0.4"
 RandomNumbers = "^1.4"
 DoubleFloats = "1"
 julia = "1"
