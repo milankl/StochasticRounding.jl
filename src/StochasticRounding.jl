@@ -38,5 +38,4 @@ module StochasticRounding
     include("general.jl")
     include("promotion.jl")
     include("conversions.jl")
-
 end
