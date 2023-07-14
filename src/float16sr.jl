@@ -12,6 +12,8 @@ Base.one(::Type{Float16sr}) = reinterpret(Float16sr,0x3c00)
 Base.zero(::Type{Float16sr}) = reinterpret(Float16sr,0x0000)
 Base.one(::Float16sr) = one(Float16sr)
 Base.zero(::Float16sr) = zero(Float16sr)
+Base.rand(::Type{Float16sr}) = reinterpret(Float16sr,rand(Float16))
+Base.randn(::Type{Float16sr}) = reinterpret(Float16sr,randn(Float16))
 
 Base.typemin(::Type{Float16sr}) = Float16sr(typemin(Float16))
 Base.typemax(::Type{Float16sr}) = Float16sr(typemax(Float16))
@@ -160,6 +162,12 @@ function Base.sincos(x::Float16sr)
     s,c = sincos(Float32(x))
     return (Float16_stochastic_round(s),Float16_stochastic_round(c))
 end
+
+# array generators
+Base.rand(::Type{Float16sr},dims::Integer...) = reinterpret.(Float16sr,rand(Float16,dims...))
+Base.randn(::Type{Float16sr},dims::Integer...) = reinterpret.(Float16sr,randn(Float16,dims...))
+Base.zeros(::Type{Float16sr},dims::Integer...) = reinterpret.(Float16sr,zeros(Float16,dims...))
+Base.ones(::Type{Float16sr},dims::Integer...) = reinterpret.(Float16sr,ones(Float16,dims...))
 
 Base.show(io::IO, x::Float16sr) = show(io,Float16(x))
 Base.bitstring(x::Float16sr) = bitstring(reinterpret(UInt16,x))

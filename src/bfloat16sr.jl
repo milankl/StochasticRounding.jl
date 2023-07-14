@@ -12,6 +12,10 @@ Base.isnan(x::BFloat16sr) = isnan(Float32(x))
 Base.precision(::Type{BFloat16sr}) = 8
 Base.one(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x3f80)
 Base.zero(::Type{BFloat16sr}) = reinterpret(BFloat16sr,0x0000)
+Base.one(::BFloat16sr) = one(BFloat16sr)
+Base.zero(::BFloat16sr) = zero(BFloat16sr)
+Base.rand(::Type{BFloat16sr}) = reinterpret(BFloat16sr,rand(BFloat16))
+Base.randn(::Type{BFloat16sr}) = reinterpret(BFloat16sr,randn(BFloat16))
 
 const InfB16sr = reinterpret(BFloat16sr, 0x7f80)
 const NaNB16sr = reinterpret(BFloat16sr, 0x7fc0)
@@ -130,6 +134,11 @@ Base.promote_rule(::Type{Float64}, ::Type{BFloat16sr}) = Float64
 for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128)
     @eval Base.promote_rule(::Type{BFloat16sr}, ::Type{$t}) = BFloat16sr
 end
+
+Base.rand(::Type{BFloat16sr},dims::Integer...) = reinterpret.(BFloat16sr,rand(BFloat16,dims...))
+Base.randn(::Type{BFloat16sr},dims::Integer...) = reinterpret.(BFloat16sr,randn(BFloat16,dims...))
+Base.zeros(::Type{BFloat16sr},dims::Integer...) = reinterpret.(BFloat16sr,zeros(BFloat16,dims...))
+Base.ones(::Type{BFloat16sr},dims::Integer...) = reinterpret.(BFloat16sr,ones(BFloat16,dims...))
 
 Base.show(io::IO, x::BFloat16sr) = show(io,BFloat16(x))
 Base.bitstring(x::BFloat16sr) = bitstring(reinterpret(UInt16,x))

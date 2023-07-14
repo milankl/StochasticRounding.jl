@@ -11,6 +11,8 @@ Base.one(::Type{Float64sr}) = reinterpret(Float64sr,one(Float64))
 Base.zero(::Type{Float64sr}) = reinterpret(Float64sr,zero(Float64))
 Base.one(::Float64sr) = one(Float64sr)
 Base.zero(::Float64sr) = zero(Float64sr)
+Base.rand(::Type{Float64sr}) = reinterpret(Float64sr,rand(Float64))
+Base.randn(::Type{Float64sr}) = reinterpret(Float64sr,randn(Float64))
 
 Base.typemin(::Type{Float64sr}) = Float64sr(typemin(Float64))
 Base.typemax(::Type{Float64sr}) = Float64sr(typemax(Float64))
@@ -114,6 +116,11 @@ for func in (:atan,:hypot)
     end
 end
 
+# array generators
+Base.rand(::Type{Float64sr},dims::Integer...) = reinterpret.(Float64sr,rand(Float64,dims...))
+Base.randn(::Type{Float64sr},dims::Integer...) = reinterpret.(Float64sr,randn(Float64,dims...))
+Base.zeros(::Type{Float64sr},dims::Integer...) = reinterpret.(Float64sr,zeros(Float64,dims...))
+Base.ones(::Type{Float64sr},dims::Integer...) = reinterpret.(Float64sr,ones(Float64,dims...))
 
 # Showing
 Base.show(io::IO, x::Float64sr) = show(io,Float64(x))
