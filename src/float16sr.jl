@@ -117,7 +117,8 @@ function Float16_chance_roundup(x::Float32)
     return (x-xround_down)/(xround_up-xround_down)
 end
 
-# Promotion
+# Promotion, always to the deterministic format that contains both
+Base.promote_rule(::Type{Float16}, ::Type{Float16sr}) = Float16
 Base.promote_rule(::Type{Float32}, ::Type{Float16sr}) = Float32
 Base.promote_rule(::Type{Float64}, ::Type{Float16sr}) = Float64
 
@@ -171,3 +172,7 @@ function Base.bitstring(x::Float16sr,mode::Symbol)
         return bitstring(x)
     end
 end
+
+# BIGFLOAT
+Float16sr(x::BigFloat) = Float16sr(Float64(x))
+Base.decompose(x::Float16sr) = Base.decompose(Float16(x))

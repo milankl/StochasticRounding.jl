@@ -122,6 +122,8 @@ for op in (:<, :<=, :isless)
     @eval Base.$op(a::BFloat16sr, b::BFloat16sr) = ($op)(Float32(a), Float32(b))
 end
 
+# Promotion, always to the deterministic format that contains both
+Base.promote_rule(::Type{Float16}, ::Type{BFloat16sr}) = Float32
 Base.promote_rule(::Type{Float32}, ::Type{BFloat16sr}) = Float32
 Base.promote_rule(::Type{Float64}, ::Type{BFloat16sr}) = Float64
 
@@ -170,3 +172,11 @@ function Base.prevfloat(x::BFloat16sr)
         return x
     end
 end
+
+#BigFloat
+BFloat16sr(x::BigFloat) = BFloat16sr(Float64(x))
+Base.decompose(x::BFloat16sr) = Base.decompose(BFloat16(x))
+
+#eps
+Base.eps(::Type{BFloat16sr}) = BFloat16sr(eps(BFloat16))
+Base.eps(x::BFloat16sr) = BFloat16sr(eps(BFloat16(x)))
