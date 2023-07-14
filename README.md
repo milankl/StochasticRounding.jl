@@ -18,13 +18,14 @@ The only known hardware implementation available is
 but other vendors are likely working on stochastic rounding for their next-generation
 GPUs (and maybe CPUs too).
 
-The software emulation of stochastic rounding in StochasticRounding.jl makes the number format
-slower, but e.g. Float32+stochastic rounding is only about 2x slower than Float64. 
+The software emulation in StochasticRounding.jl makes the number format
+slower, but e.g. Float32 with stochastic rounding is only about 2x slower than the 
+default deterministically rounded Float64. 
 [Xoroshiro128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), 
-a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used through the 
+a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used from the 
 [RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package, due to its speed and statistical properties.
 
-Ever format of `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr` uses a higher precision format
+Every format of `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr` uses a higher precision format
 to obtain the "exact" arithmetic result which is then stochastically rounded to the respective
 lower precision format. `Float16sr` and `BFloat16sr` use `Float32` for this,
 `Float32sr` uses `Float64`, and `Float64sr` uses `Double64` from
@@ -34,7 +35,7 @@ You are welcome to raise [issues](https://github.com/milankl/StochasticRounding.
 ask questions or suggest any changes or new features.
 
 `BFloat16sr` is based on [BFloat16s.jl](https://github.com/JuliaMath/BFloat16s.jl)   
-`Float16sr` is slow in Julia <1.6, but fast in Julia >=1.6 due to LLVM's `half` support.
+`Float16sr` is slow in Julia <1.6, but much faster in Julia >=1.6 due to LLVM's `half` support.
 
 ## Usage
 
@@ -81,6 +82,9 @@ the random number generator at any time with any integer larger than zero as fol
 ```julia
 julia> StochasticRounding.seed(2156712)
 ```
+
+the state of the random number generator for StochasticRounding.jl is independent from Julia's default,
+which is used for `rand()`, `randn()` etc.
 
 ## Theory
 
