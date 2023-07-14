@@ -54,12 +54,12 @@ BFloat16sr(0.33203125)
 ```
 As `1/3` is not exactly representable the rounding will be at 66.6% chance towards 0.33398438 
 and at 33.3% towards 0.33203125 such that in expectation the result is 0.33333... and therefore exact. 
-You can use `BFloat16_chance_roundup(x::Float32)` to get the chance that `x` will be round up.
+You can use `BFloat16_chance_roundup(x::Float32)` to get the chance that `x` will be rounded up.
 
 Solving a linear equation system with LU decomposition and stochastic rounding:
 ```julia
-A = Float32sr.(randn(3,3))
-b = Float32sr.(randn(3))
+A = randn(Float32sr,3,3)
+b = randn(Float32sr,3)
 ```
 Now execute the `\` several times and the results will differ slightly due to stochastic rounding
 ```julia
