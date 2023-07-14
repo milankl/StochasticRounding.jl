@@ -1,8 +1,4 @@
-<p align="center">
-<img width="10%" src="figs/logo.png">
-</p>
-
-# StochasticRounding.jl
+# StochasticRounding.jl <img width="5%" src="figs/logo.png">
 [![CI](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/milankl/StochasticRounding.jl/actions/workflows/CI.yml)
 [![DOI](https://zenodo.org/badge/247823063.svg)](https://zenodo.org/badge/latestdoi/247823063)
 
