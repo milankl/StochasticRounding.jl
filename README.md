@@ -125,6 +125,8 @@ About 50% of the time is spend on the random number generation with Xoroshiro128
 
 ## Citation
 
-If you use this package please cite us
+This package was written for the following publications. If you use this package in your publications please cite us
 
-> Paxton EA, M Chantry, M Klöwer, L Saffin, TN Palmer, 2022. Climate Modelling in Low-Precision: Effects of both Deterministic & Stochastic Rounding, Journal of Climate, [10.1175/JCLI-D-21-0343.1](https://doi.org/10.1175/JCLI-D-21-0343.1)
+> Klöwer, M, PV Coveney, EA Paxton, TN Palmer, 2023. *Periodic orbits in chaotic dynamical systems simulated at low precision*, **Scientific Reports**, [10.1038/s41598-023-37004-4](https://doi.org/10.1038/s41598-023-37004-4).
+
+> Paxton EA, M Chantry, M Klöwer, L Saffin, TN Palmer, 2022. *Climate Modelling in Low-Precision: Effects of both Deterministic & Stochastic Rounding*, **Journal of Climate**, [10.1175/JCLI-D-21-0343.1](https://doi.org/10.1175/JCLI-D-21-0343.1).
