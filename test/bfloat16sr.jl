@@ -1,33 +1,38 @@
-@testset "Sign flip" begin
-    @test one(BFloat16sr) == -(-(one(BFloat16sr)))
-    @test zero(BFloat16sr) == -(zero(BFloat16sr))
-end
+all_types = (BFloat16sr, Float16sr, Float32sr)
 
-@testset "Integer promotion" begin
-    f = BFloat16sr(1)
-    @test 2f == BFloat16sr(2)
-    @test 0f == BFloat16sr(0)
-end
+@testset for T in all_types
 
-@testset "NaN and Inf" begin
-    @test isnan(NaNB16sr)
-    @test ~isfinite(NaNB16sr)
-    @test ~isfinite(InfB16sr)
-
-    N = 1000
-    for i in 1:N
-        @test InfB16sr == BFloat16_stochastic_round(Inf32)
-        @test -InfB16sr == BFloat16_stochastic_round(-Inf32)
-        @test isnan(BFloat16_stochastic_round(NaN32))
+    @testset "Sign flip" begin
+        @test one(T) == -(-(one(T)))
+        @test zero(T) == -(zero(T))
     end
-end
 
-@testset "No stochastic round to NaN" begin
-    f1 = nextfloat(0f0)
-    f2 = prevfloat(0f0)
-    for i in 1:100
-        @test isfinite(BFloat16_stochastic_round(f1))
-        @test isfinite(BFloat16_stochastic_round(f2))
+    @testset "Integer promotion" begin
+        f = T(1)
+        @test 2f == T(2)
+        @test 0f == T(0)
+    end
+
+    @testset "NaN and Inf" begin
+        @test isnan(nan(T))
+        @test ~isfinite(nan(T))
+        @test ~isfinite(infinity(T))
+
+        N = 1000
+        for i in 1:N
+            @test stochastic_round(T,Inf) == stochastic_round(T,Inf)
+            @test stochastic_round(T,-Inf) == stochastic_round(T,-Inf)
+            @test isnan(stochastic_round(T,NaN))
+        end
+    end
+
+    @testset "No stochastic round to NaN" begin
+        f1 = nextfloat(zero(T))
+        f2 = prevfloat(zero(T))
+        for i in 1:100
+            @test isfinite(stochastic_round(T,f1))
+            @test isfinite(stochastic_round(T,f2))
+        end
     end
 end
 

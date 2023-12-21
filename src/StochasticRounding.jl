@@ -1,15 +1,5 @@
 module StochasticRounding
 
-    export BFloat16sr,BFloat16_stochastic_round,        # BFloat16 + SR
-        BFloat16_chance_roundup,NaNB16sr,InfB16sr,
-        Float16sr,Float16_stochastic_round,             # Float16 + SR
-        Float16_chance_roundup,NaN16sr,Inf16sr,
-        Float32sr,Float32_stochastic_round,             # Float32 + SR
-        Float32_chance_roundup,NaN32sr,Inf32sr,
-        Float64sr,Float64_stochastic_round,             # Float64 + SR
-        Float64_chance_roundup,
-        NaNsr,Infsr
-
     # use BFloat16 from BFloat16s.jl
     import BFloat16s: BFloat16
 
@@ -30,12 +20,11 @@ module StochasticRounding
         return nothing
     end
 
-    include("bfloat16sr.jl")
-    include("float16sr.jl")
-    include("float32sr.jl")
-    include("float64sr.jl")
+    # define abstract type
+    export AbstractStochasticFloat
+    abstract type AbstractStochasticFloat <: AbstractFloat end
 
-    include("general.jl")
-    include("promotion.jl")
-    include("conversions.jl")
+    include("types.jl")             # define concrete types
+    include("promotions.jl")        # their promotions
+    include("general.jl")           # and general functions
 end
