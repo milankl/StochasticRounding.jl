@@ -158,8 +158,8 @@ end
             Ndown + Nup != N && @info "Test failed for $x, $(bitstring(x))"
             @test isapprox(Ndown/N,1-p,atol=2e-2)
             @test isapprox(Nup/N,p,atol=2e-2)
-            p_ave += abs(Nup/N - p)
-            p_max = max(p_max,abs(Nup/N - p))
+            # p_ave += abs(Nup/N - p)
+            # p_max = max(p_max,abs(Nup/N - p))
         end
         # @info p_ave/N
         # @info p_max
