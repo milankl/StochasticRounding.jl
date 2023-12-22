@@ -86,8 +86,9 @@ end
 # same for BFloat16sr, but do not apply stochastic rounding to avoid InexactError
 Base.round(x::AbstractStochasticFloat, r::RoundingMode{:Up}) = stochastic_float(ceil(float(x)))
 Base.round(x::AbstractStochasticFloat, r::RoundingMode{:Down}) = stochastic_float(floor(float(x)))
-Base.round(x::AbstractStochasticFloat, r::RoundingMode{:Nearest}) = stochastic_float(round(floor(float(x))))
+Base.round(x::AbstractStochasticFloat, r::RoundingMode{:Nearest}) = stochastic_float(round(float(x)))
 Base.round(x::AbstractStochasticFloat, r::RoundingMode{:ToZero}) = stochastic_float(round(float(x),RoundToZero))
+Base.trunc(::Type{T},x::AbstractStochasticFloat) where T = trunc(T,float(x))
 
 # negation, and absolute
 Base.:(-)(x::AbstractStochasticFloat) = stochastic_float(-float(x))
