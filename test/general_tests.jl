@@ -139,6 +139,8 @@ function test_chances_round(
             Ndown += 1
         elseif f_sr == f_roundup
             Nup += 1
+        else
+            @info "$f although in [$f_rounddown,$f_roundup] was rounded to $f_sr"
         end
     end
     
@@ -147,12 +149,20 @@ end
 
 @testset for T in (BFloat16sr, Float16sr, Float32sr, Float64sr)
     @testset "Test for N(0,1)" begin
-        for x in randn(widen(T),10_000)
+        N = 10_000
+        # p_ave = 0     # average absolute error in rounding chances
+        # p_max = 0     # max abs error in rounding chances
+        for x in randn(widen(T),N)
             Ndown,Nup,N,p = test_chances_round(T,x)
             @test Ndown + Nup == N
+            Ndown + Nup != N && @info "Test failed for $x, $(bitstring(x))"
             @test isapprox(Ndown/N,1-p,atol=2e-2)
             @test isapprox(Nup/N,p,atol=2e-2)
+            p_ave += abs(Nup/N - p)
+            p_max = max(p_max,abs(Nup/N - p))
         end
+        # @info p_ave/N
+        # @info p_max
     end
 end
 
@@ -161,6 +171,7 @@ end
         for x in rand(widen(T),10_000)
             Ndown,Nup,N,p = test_chances_round(T,x)
             @test Ndown + Nup == N
+            Ndown + Nup != N && @info "Test failed for $x, $(bitstring(x))"
             @test isapprox(Ndown/N,1-p,atol=2e-2)
             @test isapprox(Nup/N,p,atol=2e-2)
         end
