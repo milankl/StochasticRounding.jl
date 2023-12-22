@@ -97,7 +97,7 @@ Base.abs(x::AbstractStochasticFloat) = stochastic_float(abs(float(x)))
 
 # stochastic rounding
 export stochastic_round
-stochastic_round(T::Type{<:AbstractFloat},x::AbstractFloat) = stochastic_round(T,widen(stochastic_float(T))(x))
+stochastic_round(T::Type{<:AbstractFloat},x::Real) = stochastic_round(T,widen(stochastic_float(T))(x))
 stochastic_round(T::Type{<:AbstractStochasticFloat},x::AbstractFloat) = stochastic_float(stochastic_round(float(T),x))
 
 # Comparison
@@ -129,6 +129,7 @@ Base.nextfloat(x::AbstractStochasticFloat,n::Integer) = stochastic_float(nextflo
 Base.prevfloat(x::AbstractStochasticFloat,n::Integer) = stochastic_float(prevfloat(float(x),n))
 
 export chance_roundup
+chance_roundup(T::Type{<:AbstractFloat},x::Real) = chance_roundup(stochastic_float(T),x)
 function chance_roundup(T::Type{<:AbstractStochasticFloat},x::Real)
     x = widen(T)(x)
     xround = float(T)(x)
@@ -138,3 +139,4 @@ function chance_roundup(T::Type{<:AbstractStochasticFloat},x::Real)
     
     return (x-xround_down)/(xround_up-xround_down)
 end
+
