@@ -16,6 +16,7 @@ end
 (::Type{T})(x::Rational) where {T<:AbstractStochasticFloat} = stochastic_float(float(T)(x))
 (::Type{T})(x::AbstractStochasticFloat) where {T<:AbstractFloat} = convert(T,float(x))
 (::Type{T})(x::AbstractStochasticFloat) where {T<:AbstractStochasticFloat} = stochastic_float(convert(float(T),float(x)))
+DoubleFloats.Double64(x::T) where T<:AbstractStochasticFloat = Double64(float(x))
 
 # masks same as for deterministic floats
 Base.sign_mask(T::Type{<:AbstractStochasticFloat}) = Base.sign_mask(float(T))
