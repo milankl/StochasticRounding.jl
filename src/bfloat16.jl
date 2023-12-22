@@ -11,7 +11,7 @@ function Base.nextfloat(f::BFloat16, d::Integer)
     fu = unsigned(fi & typemax(fi))
 
     dneg = d < 0
-    da = Base.abs(d)
+    da = Base.uabs(d)
     if da > typemax(U)
         fneg = dneg
         fu = fumax
