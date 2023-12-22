@@ -4,7 +4,7 @@
 
 Stochastic rounding for floating-point arithmetic.
 
-This package exports `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr`, three number formats that behave
+This package exports `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr`, four number formats that behave
 like their deterministic counterparts but with stochastic rounding that is proportional to the
 distance of the next representable numbers and therefore
 [exact in expectation](https://en.wikipedia.org/wiki/Rounding#Stochastic_rounding)
@@ -35,8 +35,25 @@ ask questions or suggest any changes or new features.
 
 ## Usage
 
-`Float64sr`, `Float32sr`, `Float16sr` and `BFloat16sr` are supposed to be drop-in replacements for their
-deterministically rounded counterparts. You can create data of those types as expected
+StochasticRounding.jl defines `stochastic_round` as a general interface to round stochastically to
+a floating-point number, e.g.
+```julia
+julia> stochastic_round(Float32,π)
+3.1415927f0
+
+julia> stochastic_round(Float32,π)
+3.1415925f0
+```
+Here we round π (which is first converted to Float64) to Float32 where it is not exactly representable,
+hence we have results that differ in the last bit. The chance here is 
+```julia
+julia> chance_roundup(Float32,π)
+0.6333222836256027
+```
+about 63% to obtain the first (which therefore would be round to nearest, the default rounding mode),
+and hence 37% to obtain the latter (round away from nearest). The `stochastic_round` function is wrapped
+into the floating-point formats `Float64sr`, `Float32sr`, `Float16sr` and `BFloat16sr` are supposed to be drop-in
+replacements for their deterministically rounded counterparts. You can create data of those types as expected
 (which is bitwise identical to the deterministic formats respectively) and the type
 will trigger stochastic rounding on every arithmetic operation.
 
@@ -50,7 +67,8 @@ BFloat16sr(0.33203125)
 ```
 As `1/3` is not exactly representable the rounding will be at 66.6% chance towards 0.33398438 
 and at 33.3% towards 0.33203125 such that in expectation the result is 0.33333... and therefore exact. 
-You can use `BFloat16_chance_roundup(x::Float32)` to get the chance that `x` will be rounded up.
+
+## Example
 
 Solving a linear equation system with LU decomposition and stochastic rounding:
 ```julia
