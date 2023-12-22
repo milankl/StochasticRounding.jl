@@ -49,14 +49,18 @@ end
 Create a random perturbation for the Float16 subnormals for
 stochastic rounding of Float32 -> Float16.
 This function samples uniformly from [-2.980232f-8,2.9802319f-8].
+= [-u/2,u/2].
 This function is algorithmically similar to randfloat from RandomNumbers.jl"""
 function rand_subnormal(rbits::UInt32)
     lz = leading_zeros(rbits)   # count leading zeros for correct probabilities of exponent
     e = ((101 - lz) % UInt32) << 23
     e |= (rbits << 31)          # use last bit for sign
-    
+
     # combine exponent with random mantissa
-    return reinterpret(Float32,e | (rbits & 0x007f_ffff))
+    # the mask should be 0x007f_ffff but that can create a
+    # Float16-representable number to be rounded away at very low chance
+    # hence tweak the mask so that the largest perturbation is tiny bit smaller
+    return reinterpret(Float32,e | (rbits & 0x007f_fdff))
 end
 
 # FLOAT32 + STOCHASTIC ROUNDING, DEFINE EVERYTHING SPECIFIC
