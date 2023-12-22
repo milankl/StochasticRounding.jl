@@ -48,3 +48,5 @@ function Base.decompose(x::BFloat16)::NTuple{3,Int}
     d = ifelse(signbit(x), -1, 1)
     s, e - 134 + (e == 0), d
 end
+
+BFloat16s.BFloat16(x::BigFloat) = Float32(x)
