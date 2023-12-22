@@ -27,4 +27,5 @@ module StochasticRounding
     include("types.jl")             # define concrete types
     include("promotions.jl")        # their promotions
     include("general.jl")           # and general functions
+    include("bfloat16.jl")          # some functions that aren't yet in BFloat16s.jl
 end
