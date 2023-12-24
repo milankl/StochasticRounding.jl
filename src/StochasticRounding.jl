@@ -1,7 +1,7 @@
 module StochasticRounding
 
     # use BFloat16 from BFloat16s.jl
-    import BFloat16s: BFloat16
+    import BFloat16s: BFloat16s, BFloat16
 
     # faster random number generator
     import RandomNumbers.Xorshifts.Xoroshiro128Plus
