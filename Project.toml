@@ -1,22 +1,24 @@
 name = "StochasticRounding"
 uuid = "3843c9a1-1f18-49ff-9d99-1b4c8a8e97ed"
-authors = ["Milan Kloewer"]
-version = "0.7"
+authors = ["Milan Kloewer and StochasticRounding.jl contributors"]
+version = "0.8.0"
 
 [deps]
 BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RandomNumbers = "e6cf234a-135c-5ec9-84dd-332b85af5143"
 
 [compat]
 BFloat16s = "0.1, 0.2, 0.3, 0.4"
-RandomNumbers = "^1.4"
 DoubleFloats = "1"
+Random = "1"
+RandomNumbers = "^1.4"
 julia = "1"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test","DifferentialEquations"]
+test = ["Test", "DifferentialEquations"]
