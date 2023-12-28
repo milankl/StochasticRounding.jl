@@ -40,6 +40,11 @@ Base.randn(::Type{T},dims::Integer...) where {T<:AbstractStochasticFloat} = rein
 Base.zeros(::Type{T},dims::Integer...) where {T<:AbstractStochasticFloat} = reinterpret.(T,zeros(float(T),dims...))
 Base.ones(::Type{T},dims::Integer...) where {T<:AbstractStochasticFloat} = reinterpret.(T,ones(float(T),dims...))
 
+import Random: rand, randn, randexp, AbstractRNG, Sampler
+rand(   rng::AbstractRNG, ::Sampler{T}) where {T<:AbstractStochasticFloat} = convert(T, rand(rng))
+randn(  rng::AbstractRNG, ::Type{T}) where {T<:AbstractStochasticFloat} = convert(T, randn(rng))
+randexp(rng::AbstractRNG, ::Type{T}) where {T<:AbstractStochasticFloat} = convert(T, randexp(rng))
+
 Base.iszero(x::AbstractStochasticFloat) = iszero(float(x))
 Base.isfinite(x::AbstractStochasticFloat) = isfinite(float(x))
 Base.isnan(x::AbstractStochasticFloat) = isnan(float(x))
