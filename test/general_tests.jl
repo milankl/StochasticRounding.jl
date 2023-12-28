@@ -81,6 +81,17 @@ end
 end
 
 @testset for T in (BFloat16sr, Float16sr, Float32sr, Float64sr)
+    @testset "Random" begin
+        for r in (rand,randn)
+            @test r(T) isa T
+            @test r(Complex{T}) isa Complex{T}
+            @test r(T,2,3,4) isa Array{T}
+            @test r(Complex{T},2,3,4) isa Array{Complex{T}}
+        end
+    end
+end
+
+@testset for T in (BFloat16sr, Float16sr, Float32sr, Float64sr)
     @testset "Nextfloat prevfloat" begin
         o = one(T)
         @test o == nextfloat(prevfloat(o))
