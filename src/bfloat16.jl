@@ -49,4 +49,4 @@ function Base.decompose(x::BFloat16)::NTuple{3,Int}
     s, e - 134 + (e == 0), d
 end
 
-BFloat16s.BFloat16(x::BigFloat) = Float32(x)
+BFloat16s.BFloat16(x::BigFloat) = BFloat16(Float32(x))
