@@ -55,4 +55,3 @@ Base.BigFloat(x::BFloat16) = BigFloat(Float32(x))
 Base.maxintfloat(::Type{BFloat16}) = reinterpret(BFloat16,0x4380)
 
 Base.round(x::BFloat16, r::RoundingMode{:ToZero}) = BFloat16(trunc(Float32(x)))
-Base.round(x::BFloat16, r::RoundingMode{:Down}) = BFloat16(floor(Float32(x)))
