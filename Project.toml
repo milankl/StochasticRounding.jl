@@ -10,7 +10,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RandomNumbers = "e6cf234a-135c-5ec9-84dd-332b85af5143"
 
 [compat]
-BFloat16s = "0.5"
+BFloat16s = "0.1, 0.2, 0.3, 0.4, 0.5"
 DoubleFloats = "1"
 Random = "1"
 RandomNumbers = "^1.4"
