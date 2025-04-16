@@ -96,6 +96,8 @@ Base.round(x::AbstractStochasticFloat, r::RoundingMode{:Nearest}) = stochastic_f
 Base.round(x::AbstractStochasticFloat, r::RoundingMode{:ToZero}) = stochastic_float(round(float(x),RoundToZero))
 Base.trunc(::Type{T},x::AbstractStochasticFloat) where T = trunc(T,float(x))
 
+Base.rem(x::AbstractStochasticFloat, y::Real) = stochastic_float(rem(float(x), y))
+
 # negation, and absolute
 Base.:(-)(x::AbstractStochasticFloat) = stochastic_float(-float(x))
 Base.abs(x::AbstractStochasticFloat) = stochastic_float(abs(float(x)))
