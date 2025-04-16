@@ -1,11 +1,11 @@
 # BFLOAT16 + STOCHASTIC ROUNDING, DEFINE EVERYTHING SPECIFIC
 export BFloat16sr
 primitive type BFloat16sr <: AbstractStochasticFloat 16 end
-Base.float(::Type{BFloat16sr}) = BFloat16       # corresponding deterministic float
-stochastic_float(::Type{BFloat16}) = BFloat16sr # and stochastic float
-BFloat16sr(x::BFloat16) = stochastic_float(x)   # direct conversion
-Base.uinttype(::Type{BFloat16sr}) = UInt16      # corresponding uint
-Base.widen(::Type{BFloat16sr}) = Float32        # higher precision format for exact arithmetic
+Base.float(::Type{BFloat16sr}) = BFloat16       # corresponding deterministic float
+stochastic_float(::Type{BFloat16}) = BFloat16sr # and stochastic float
+BFloat16sr(x::BFloat16) = stochastic_float(x)   # direct conversion
+Base.uinttype(::Type{BFloat16sr}) = UInt16      # corresponding uint
+Base.widen(::Type{BFloat16sr}) = Float32        # higher precision format for exact arithmetic
 
 """Stochastically round x::Float32 to BFloat16 with distance-proportional probabilities."""
 function stochastic_round(T::Type{BFloat16},x::Float32)
@@ -17,11 +17,11 @@ end
 # FLOAT16 + STOCHASTIC ROUNDING, DEFINE EVERYTHING SPECIFIC
 export Float16sr
 primitive type Float16sr <: AbstractStochasticFloat 16 end
-Base.float(::Type{Float16sr}) = Float16         # corresponding deterministic float
-stochastic_float(::Type{Float16}) = Float16sr   # and stochastic float
-Float16sr(x::Float16) = stochastic_float(x)     # direct conversion
-Base.uinttype(::Type{Float16sr}) = UInt16       # corresponding uint
-Base.widen(::Type{Float16sr}) = Float32         # higher precision format for exact arithmetic
+Base.float(::Type{Float16sr}) = Float16         # corresponding deterministic float
+stochastic_float(::Type{Float16}) = Float16sr   # and stochastic float
+Float16sr(x::Float16) = stochastic_float(x)     # direct conversion
+Base.uinttype(::Type{Float16sr}) = UInt16       # corresponding uint
+Base.widen(::Type{Float16sr}) = Float32         # higher precision format for exact arithmetic
 
 const FLOATMIN_F16 = Float32(floatmin(Float16))
 
@@ -33,7 +33,7 @@ function stochastic_round(T::Type{Float16},x::Float32)
     # subnormals are rounded with float-arithmetic for uniform stoch perturbation
     abs(x) < FLOATMIN_F16 && return Float16(x+rand_subnormal(rbits))
     
-    # normals are stochastically rounded with integer arithmetic
+    # normals are stochastically rounded with integer arithmetic
     ui = reinterpret(UInt32,x)
     mask = 0x0000_1fff          # only mantissa bit 11-23 (the non-Float16 ones)
     ui += (rbits & mask)        # add perturbation in [0,u)
@@ -59,7 +59,7 @@ function rand_subnormal(rbits::UInt32)
     # combine exponent with random mantissa
     # the mask should be 0x007f_ffff but that can create a
     # Float16-representable number to be rounded away at very low chance
-    # hence tweak the mask so that the largest perturbation is tiny bit smaller
+    # hence tweak the mask so that the largest perturbation is tiny bit smaller
     return reinterpret(Float32,e | (rbits & 0x007f_fdff))
 end
 

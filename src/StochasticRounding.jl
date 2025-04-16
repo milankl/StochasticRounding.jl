@@ -1,7 +1,8 @@
 module StochasticRounding
 
-    # use BFloat16 from BFloat16s.jl
+    # use BFloat16 from BFloat16s.jl
     import BFloat16s: BFloat16s, BFloat16
+    export BFloat16     # reexport BFloat16
 
     # faster random number generator
     import RandomNumbers.Xorshifts.Xoroshiro128Plus
@@ -27,5 +28,4 @@ module StochasticRounding
     include("types.jl")             # define concrete types
     include("promotions.jl")        # their promotions
     include("general.jl")           # and general functions
-    include("bfloat16.jl")          # some functions that aren't yet in BFloat16s.jl
 end
