@@ -12,10 +12,10 @@ for t in (Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt
 end
 
 # other floats, irrational and rationals
-(::Type{T})(x::Real) where {T<:AbstractStochasticFloat} = stochastic_float(float(T)(x))
-(::Type{T})(x::Rational) where {T<:AbstractStochasticFloat} = stochastic_float(float(T)(x))
+(::Type{T})(x::Real) where {T<:AbstractStochasticFloat} = stochastic_round(T,x)
+(::Type{T})(x::Rational) where {T<:AbstractStochasticFloat} = stochastic_round(stochastic_float(float(T)),x)
 (::Type{T})(x::AbstractStochasticFloat) where {T<:AbstractFloat} = convert(T,float(x))
-(::Type{T})(x::AbstractStochasticFloat) where {T<:AbstractStochasticFloat} = stochastic_float(convert(float(T),float(x)))
+(::Type{T})(x::AbstractStochasticFloat) where {T<:AbstractStochasticFloat} = stochastic_round(T,float(x))
 DoubleFloats.Double64(x::T) where T<:AbstractStochasticFloat = Double64(float(x))
 
 # masks same as for deterministic floats
@@ -104,8 +104,8 @@ Base.abs(x::AbstractStochasticFloat) = stochastic_float(abs(float(x)))
 
 # stochastic rounding
 export stochastic_round
-stochastic_round(T::Type{<:AbstractFloat},x::Real) = stochastic_round(T,widen(stochastic_float(T))(x))
-stochastic_round(T::Type{<:AbstractStochasticFloat},x::AbstractFloat) = stochastic_float(stochastic_round(float(T),x))
+stochastic_round(T::Type{<:AbstractFloat}, x::Real) = stochastic_round(T,widen(stochastic_float(T))(x))
+stochastic_round(T::Type{<:AbstractStochasticFloat}, x::Real) = stochastic_float(stochastic_round(float(T),x))
 
 # Comparison
 for op in (:(==), :<, :<=, :isless)
