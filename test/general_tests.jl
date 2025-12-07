@@ -255,8 +255,15 @@ end
     end
 end
 
-
-
+@testset "LinearAlgebra" begin
+    @testset "norm" begin
+        for T in (BFloat16sr, Float16sr, Float32sr, Float64sr)
+            v = [T(3.0), T(4.0)]
+            @test eltype(norm(v)) == T
+            @test norm(v) ≈ T(5.0)
+        end
+    end
+end
 
 
 

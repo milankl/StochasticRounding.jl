@@ -1,7 +1,8 @@
 # conversions
 export stochastic_float
 stochastic_float(x::AbstractFloat) = reinterpret(stochastic_float(typeof(x)),x)
-Base.float(x::AbstractStochasticFloat) = reinterpret(float(typeof(x)),x)
+float(x::AbstractStochasticFloat) = reinterpret(float(typeof(x)),x)
+Base.float(x::AbstractStochasticFloat) = x
 uint(x::AbstractStochasticFloat) = reinterpret(Base.uinttype(typeof(x)),x)
 Base.widen(x::AbstractStochasticFloat) = widen(typeof(x))(float(x))
 

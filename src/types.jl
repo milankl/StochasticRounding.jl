@@ -1,7 +1,7 @@
 # BFLOAT16 + STOCHASTIC ROUNDING, DEFINE EVERYTHING SPECIFIC
 export BFloat16sr
 primitive type BFloat16sr <: AbstractStochasticFloat 16 end
-Base.float(::Type{BFloat16sr}) = BFloat16       # corresponding deterministic float
+float(::Type{BFloat16sr}) = BFloat16       # corresponding deterministic float
 stochastic_float(::Type{BFloat16}) = BFloat16sr # and stochastic float
 BFloat16sr(x::BFloat16) = stochastic_float(x)   # direct conversion
 Base.uinttype(::Type{BFloat16sr}) = UInt16      # corresponding uint
@@ -17,7 +17,7 @@ end
 # FLOAT16 + STOCHASTIC ROUNDING, DEFINE EVERYTHING SPECIFIC
 export Float16sr
 primitive type Float16sr <: AbstractStochasticFloat 16 end
-Base.float(::Type{Float16sr}) = Float16         # corresponding deterministic float
+float(::Type{Float16sr}) = Float16         # corresponding deterministic float
 stochastic_float(::Type{Float16}) = Float16sr   # and stochastic float
 Float16sr(x::Float16) = stochastic_float(x)     # direct conversion
 Base.uinttype(::Type{Float16sr}) = UInt16       # corresponding uint
@@ -66,7 +66,7 @@ end
 # FLOAT32 + STOCHASTIC ROUNDING, DEFINE EVERYTHING SPECIFIC
 export Float32sr
 primitive type Float32sr <: AbstractStochasticFloat 32 end
-Base.float(::Type{Float32sr}) = Float32
+float(::Type{Float32sr}) = Float32
 stochastic_float(::Type{Float32}) = Float32sr
 Float32sr(x::Float32) = stochastic_float(x)
 Base.uinttype(::Type{Float32sr}) = UInt32
@@ -108,7 +108,7 @@ end
 # FLOAT32 + STOCHASTIC ROUNDING, DEFINE EVERYTHING SPECIFIC
 export Float64sr
 primitive type Float64sr <: AbstractStochasticFloat 64 end
-Base.float(::Type{Float64sr}) = Float64
+float(::Type{Float64sr}) = Float64
 stochastic_float(::Type{Float64}) = Float64sr
 Float64sr(x::Float64) = stochastic_float(x)
 Base.uinttype(::Type{Float64sr}) = UInt64

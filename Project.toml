@@ -1,7 +1,7 @@
 name = "StochasticRounding"
 uuid = "3843c9a1-1f18-49ff-9d99-1b4c8a8e97ed"
 authors = ["Milan Kloewer and StochasticRounding.jl contributors"]
-version = "0.8.3"
+version = "0.9.0"
 
 [deps]
 BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
