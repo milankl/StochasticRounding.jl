@@ -17,9 +17,9 @@ GPUs (and maybe CPUs too).
 The software emulation in StochasticRounding.jl makes the number format
 slower, but e.g. Float32 with stochastic rounding is only about 2x slower than the 
 default deterministically rounded Float64. 
-[Xoroshiro128Plus](https://sunoru.github.io/RandomNumbers.jl/stable/man/xorshifts/#Xorshift-Family-1), 
-a random number generator from the [Xorshift family](https://en.wikipedia.org/wiki/Xorshift), is used from the 
-[RandomNumbers.jl](https://github.com/sunoru/RandomNumbers.jl) package, due to its speed and statistical properties.
+The random bits come from Julia's task-local random number generator
+([Xoshiro256++](https://docs.julialang.org/en/v1/stdlib/Random/#Random.Xoshiro)),
+so every task has its own generator state and stochastic rounding is thread-safe.
 
 Every format of `Float64sr`, `Float32sr`,`Float16sr`, and `BFloat16sr` uses a higher precision format
 to obtain the "exact" arithmetic result which is then stochastically rounded to the respective
@@ -89,16 +89,19 @@ julia> A\b
   2.0391457f0
  -0.5919949f0
 ```
-The random number generator is randomly seeded on every `import` or `using` such that running
+The random number generator is randomly seeded when Julia starts such that running
 the same calculations twice, will not yield bit-reproducible results. However, you can seed
-the random number generator at any time with any integer larger than zero as follows
+the random number generator at any time with any integer as follows
 
 ```julia
 julia> StochasticRounding.seed(2156712)
 ```
 
-the state of the random number generator for StochasticRounding.jl is independent from Julia's default,
-which is used for `rand()`, `randn()` etc.
+StochasticRounding.jl uses Julia's task-local default random number generator, so
+`StochasticRounding.seed(i)` is the same as `Random.seed!(i)` and also seeds `rand()`, `randn()` etc.
+in the current task. Tasks spawned after seeding, e.g. by `Threads.@threads`, derive their
+generator state deterministically from their parent, so multithreaded calculations are
+bit-reproducible after seeding as long as the work is split over tasks in the same way.
 
 ## Theory
 
@@ -139,7 +142,7 @@ And similarly for the other number types. Then with Julia 1.6 on an Intel(R) Cor
 Stochastic rounding imposes an about x5 performance decrease for Float32 and BFloat16, but only x2 for Float16,
 however, 10x for Float64 due to the use of Double64.
 For more complicated benchmarks the performance decrease is usually within x10.
-About 50% of the time is spend on the random number generation with Xoroshiro128+.
+About 50% of the time is spend on the random number generation.
 
 ## Citation
 
