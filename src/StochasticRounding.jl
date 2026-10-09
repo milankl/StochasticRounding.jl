@@ -4,20 +4,27 @@ module StochasticRounding
     import BFloat16s: BFloat16s, BFloat16
     export BFloat16     # reexport BFloat16
 
-    # faster random number generator
-    import RandomNumbers.Xorshifts.Xoroshiro128Plus
-    const Xor128 = Ref{Xoroshiro128Plus}(Xoroshiro128Plus())
+    # Random bits for stochastic rounding come from Julia's task-local Xoshiro256++.
+    # Each task has its own generator state, so stochastic rounding is thread-safe
+    # and needs no locking, and child tasks are seeded deterministically from their
+    # parent, so threaded code is reproducible after `seed`.
+    import Random
+    const RNG = Random.TaskLocalRNG()
 
     import DoubleFloats: DoubleFloats, Double64
 
-    """Reseed the PRNG randomly by recalling."""
-    function __init__()
-        Xor128[] = Xoroshiro128Plus()
-    end
+    """
+        seed(i::Integer)
 
-    """Seed the PRNG with any integer >0."""
+    Seed the random number generator used for stochastic rounding in the current task.
+    Tasks spawned afterwards (e.g. by `Threads.@threads`) derive their generators from it.
+
+    !!! note
+        This is the task-local default generator, so this also seeds `rand()` in the
+        current task, i.e., it is the same as `Random.seed!(i)`.
+    """
     function seed(i::Integer)
-        Xor128[] = Xoroshiro128Plus(UInt64(i))
+        Random.seed!(RNG, i)
         return nothing
     end
 

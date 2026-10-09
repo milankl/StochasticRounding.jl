@@ -10,7 +10,7 @@ Base.widen(::Type{BFloat16sr}) = Float32        # higher precision format for ex
 """Stochastically round x::Float32 to BFloat16 with distance-proportional probabilities."""
 function stochastic_round(T::Type{BFloat16},x::Float32)
     ui = reinterpret(UInt32,x)
-    ui += rand(Xor128[],UInt16)							# add stochastic perturbation in [0,u)
+    ui += rand(RNG,UInt16)							# add stochastic perturbation in [0,u)
     return reinterpret(BFloat16,(ui >> 16) % UInt16)	# round to zero and convert to BFloat16
 end
 
@@ -28,7 +28,7 @@ const FLOATMIN_F16 = Float32(floatmin(Float16))
 """
 Stochastically round x::Float32 to Float16 with distance-proportional probabilities."""
 function stochastic_round(T::Type{Float16},x::Float32)
-    rbits = rand(Xor128[],UInt32)   # create random bits
+    rbits = rand(RNG,UInt32)   # create random bits
 
     # subnormals are rounded with float-arithmetic for uniform stoch perturbation
     abs(x) < FLOATMIN_F16 && return Float16(x+rand_subnormal(rbits))
@@ -76,7 +76,7 @@ const FLOATMIN_F32 = Float64(floatmin(Float32))
 
 """Stochastically round x::Float64 to Float32 with distance-proportional probabilities."""
 function stochastic_round(T::Type{Float32},x::Float64)
-    rbits = rand(Xor128[],UInt64)               # create random bits
+    rbits = rand(RNG,UInt64)               # create random bits
 
     # subnormals are rounded with float-arithmetic for uniform stoch perturbation
     abs(x) < FLOATMIN_F32 && return Float32(x+rand_subnormal(rbits))
@@ -116,7 +116,7 @@ Base.widen(::Type{Float64sr}) = Double64
 
 """Stochastically round x::Double64 to Float64 with distance-proportional probabilities."""
 function stochastic_round(T::Type{Float64},x::Double64)
-    rbits = rand(Xor128[],UInt64)   # create random bits
+    rbits = rand(RNG,UInt64)   # create random bits
     
     # create [1,2)-1.5 = [-0.5,0.5)
     r = reinterpret(Float64,reinterpret(UInt64,one(Float64)) + (rbits >> 12)) - 1.5
